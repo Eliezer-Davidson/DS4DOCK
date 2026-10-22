@@ -1,0 +1,18 @@
+{
+  "touch_gain": 0.35,
+  "touch_accel": 0.0,
+  "touch_scroll_gain": 0.8,
+  "natural_scroll": false,
+  "tap_max_s": 0.18,
+  "tap_max_move": 40,
+  "stick_deadzone": 12,
+  "stick_expo": 2.0,
+  "stick_max_px": 8.0,
+  "flick_on": 0.6,
+  "flick_off": 0.3,
+  "key_repeat": true,
+  "hold_s": 0.25,
+  "rstick_rate_min": 4.0,
+  "rstick_rate_max": 25.0,
+  "led_idle_s": 2.0
+}

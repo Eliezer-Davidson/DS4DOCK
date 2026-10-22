@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Five buttons (v2)",
+  "notes": "Default map for the bare-board dock (five buttons). Hold L3 for the Fn layer. See docs/CONTROLS.md.",
+  "fn": {"button": "L3", "tap": {"key": "esc"}},
+  "buttons": {
+    "Pad":      {"press": {"mouse": "right"}, "tap": null, "hold": null, "fn": {"action": "suspend"}},
+    "L3":       null,
+    "R3":       {"press": {"key": "enter"}, "tap": null, "hold": null, "fn": {"key": "super+h"}},
+    "Share":    {"press": null, "tap": {"key": "ctrl+c"}, "hold": {"key": "shift"}, "fn": {"key": "super+shift+s"}},
+    "Options":  {"press": null, "tap": {"key": "ctrl+v"}, "hold": {"key": "ctrl"}, "fn": {"key": "super+x"}},
+    "Cross":    {"press": {"key": "enter"}, "tap": null, "hold": null, "fn": {"key": "space"}},
+    "Circle":   {"press": {"key": "esc"}, "tap": null, "hold": null, "fn": {"key": "esc"}},
+    "Triangle": {"press": {"key": "media_play_pause"}, "tap": null, "hold": null, "fn": {"key": "mute"}},
+    "Square":   {"press": {"key": "backspace"}, "tap": null, "hold": null, "fn": {"key": "tab"}},
+    "dpad_N":   {"press": {"key": "up"}, "tap": null, "hold": null, "fn": {"key": "pageup"}},
+    "dpad_S":   {"press": {"key": "down"}, "tap": null, "hold": null, "fn": {"key": "pagedown"}},
+    "dpad_W":   {"press": {"key": "left"}, "tap": null, "hold": null, "fn": {"key": "home"}},
+    "dpad_E":   {"press": {"key": "right"}, "tap": null, "hold": null, "fn": {"key": "end"}},
+    "L1":       {"press": {"key": "shift"}, "tap": null, "hold": null, "fn": {"key": "shift"}},
+    "R1":       {"press": {"key": "ctrl"}, "tap": null, "hold": null, "fn": {"key": "ctrl"}},
+    "L2":       null,
+    "R2":       null,
+    "PS":       null
+  },
+  "right_stick": {
+    "mode": "keys",
+    "keys": {"N": "up", "S": "down", "W": "left", "E": "right"},
+    "fn":   {"N": "ctrl+k ctrl+up", "S": "ctrl+k ctrl+down", "W": "ctrl+k ctrl+left", "E": "ctrl+k ctrl+right"}
+  },
+  "left_stick": {
+    "flick": {"N": "ctrl+shift+tab", "S": "ctrl+tab", "W": "alt+shift+tab", "E": "alt+tab"},
+    "fn":    {"N": {"key": "super+tab"}, "S": {"action": "cursor_centre"}, "W": null, "E": null}
+  },
+  "touchpad": {
+    "one_finger":     "cursor",
+    "one_finger_tap": {"mouse": "left"},
+    "two_finger":     "scroll",
+    "two_finger_tap": {"mouse": "middle"}
+  }
+}

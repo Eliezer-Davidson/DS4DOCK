@@ -1,0 +1,23 @@
+name: tests
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  selftest:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: mapper self-test (no hardware, no dependencies)
+        run: python ds4_dock.py --selftest
+      - name: default mapping loads and round-trips
+        run: python ds4_dock.py --selftest --map mapping.json
+      - name: mapping editor logic (headless)
+        run: python tools/mapping_editor.py --selftest

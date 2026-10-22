@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1312 468" width="1312" height="468" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif">
+<title>Five buttons (v2) (bare)</title>
+<text x="16" y="26" font-size="17" text-anchor="start" dominant-baseline="central" font-weight="bold"><tspan fill="#6e7781">Five buttons (v2)</tspan></text>
+<text x="16" y="48" font-size="13" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">the printed palm plate from above, keyboard edge up: touchpad, two sticks, Share, Options - faint controls are not on this board</tspan></text>
+<polygon points="358,378 358,138.4 298,138.4 294.4,168.3 301.6,198.3 294.4,228.2 301.6,258.2 294.4,288.1 301.6,318.1 294.4,348.1 298,378" fill="#8b949e" stroke="#8b949e" stroke-width="1" fill-opacity="0.07" stroke-opacity="0.55"/>
+<polyline points="358,150 298,150" fill="none" stroke="#8b949e" stroke-width="0.9" stroke-opacity="0.45"/>
+<ellipse cx="326" cy="364" rx="4" ry="4" fill="#8b949e" stroke="none" fill-opacity="0.45"/>
+<ellipse cx="326" cy="162.4" rx="4" ry="4" fill="#8b949e" stroke="none" fill-opacity="0.45"/>
+<text x="312" y="334" font-size="9" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 312 334)"><tspan fill="#8b949e" fill-opacity="0.95">extender 60 mm</tspan></text>
+<polygon points="954,378 954,138.4 1014,138.4 1017.6,168.3 1010.4,198.3 1017.6,228.2 1010.4,258.2 1017.6,288.1 1010.4,318.1 1017.6,348.1 1014,378" fill="#8b949e" stroke="#8b949e" stroke-width="1" fill-opacity="0.07" stroke-opacity="0.55"/>
+<polyline points="954,150 1014,150" fill="none" stroke="#8b949e" stroke-width="0.9" stroke-opacity="0.45"/>
+<ellipse cx="986" cy="364" rx="4" ry="4" fill="#8b949e" stroke="none" fill-opacity="0.45"/>
+<ellipse cx="986" cy="162.4" rx="4" ry="4" fill="#8b949e" stroke="none" fill-opacity="0.45"/>
+<text x="1000" y="334" font-size="9" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 1000 334)"><tspan fill="#8b949e" fill-opacity="0.95">extenders 115 + 115 mm</tspan></text>
+<polygon points="358,362 358.4,366.9 359.8,370.9 362,374 365.1,376.2 369.1,377.6 374,378 938,378 942.9,377.6 946.9,376.2 950,374 952.2,370.9 953.6,366.9 954,362 954,154.4 953.6,149.5 952.2,145.5 950,142.4 946.9,140.2 942.9,138.8 938,138.4 760,138.4 760,238 550.4,238 550.4,138.4 374,138.4 369.1,138.8 365.1,140.2 362,142.4 359.8,145.5 358.4,149.5 358,154.4" fill="#8b949e" stroke="#6e7781" stroke-width="1.6" fill-opacity="0.16"/>
+<polyline points="358,150 550.4,150" fill="none" stroke="#6e7781" stroke-width="1" stroke-opacity="0.75"/>
+<polyline points="760,150 954,150" fill="none" stroke="#6e7781" stroke-width="1" stroke-opacity="0.75"/>
+<ellipse cx="370.8" cy="364" rx="8" ry="8" fill="none" stroke="#6e7781" stroke-width="0.9" stroke-opacity="0.7"/>
+<ellipse cx="370.8" cy="364" rx="4" ry="4" fill="#6e7781" stroke="none" fill-opacity="0.7"/>
+<ellipse cx="941.2" cy="364" rx="8" ry="8" fill="none" stroke="#6e7781" stroke-width="0.9" stroke-opacity="0.7"/>
+<ellipse cx="941.2" cy="364" rx="4" ry="4" fill="#6e7781" stroke="none" fill-opacity="0.7"/>
+<ellipse cx="370.8" cy="162.4" rx="8" ry="8" fill="none" stroke="#6e7781" stroke-width="0.9" stroke-opacity="0.7"/>
+<ellipse cx="370.8" cy="162.4" rx="4" ry="4" fill="#6e7781" stroke="none" fill-opacity="0.7"/>
+<ellipse cx="941.2" cy="162.4" rx="8" ry="8" fill="none" stroke="#6e7781" stroke-width="0.9" stroke-opacity="0.7"/>
+<ellipse cx="941.2" cy="162.4" rx="4" ry="4" fill="#6e7781" stroke="none" fill-opacity="0.7"/>
+<text x="656" y="128.8" font-size="11" text-anchor="middle" dominant-baseline="central"><tspan fill="#8b949e" fill-opacity="0.95">keyboard edge</tspan></text>
+<text x="476" y="388.4" font-size="11" text-anchor="middle" dominant-baseline="central"><tspan fill="#8b949e" fill-opacity="0.95">user's edge</tspan></text>
+<polygon points="552.8,229.6 553.2,232.2 554.3,234.1 556.2,235.2 558.8,235.6 751.6,235.6 754.2,235.2 756.1,234.1 757.2,232.2 757.6,229.6 757.6,150 552.8,150" fill="#8b949e" stroke="#6e7781" stroke-width="1.6" fill-opacity="0.32"/>
+<polyline points="575.2,157.2 735.2,157.2" fill="none" stroke="#d8651a" stroke-width="2.2" stroke-linecap="round" stroke-opacity="0.9"/>
+<ellipse cx="555.2" cy="308" rx="44" ry="44" fill="#8b949e" stroke="#6e7781" stroke-width="1.2" fill-opacity="0.22"/>
+<ellipse cx="555.2" cy="308" rx="32" ry="32" fill="#8b949e" stroke="#6e7781" stroke-width="1.6" fill-opacity="0.32"/>
+<ellipse cx="555.2" cy="308" rx="24" ry="24" fill="none" stroke="#6e7781" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="555.2" y="308" font-size="9.2" text-anchor="middle" dominant-baseline="central"><tspan fill="#6e7781">L3</tspan></text>
+<ellipse cx="755.2" cy="308" rx="44" ry="44" fill="#8b949e" stroke="#6e7781" stroke-width="1.2" fill-opacity="0.22"/>
+<ellipse cx="755.2" cy="308" rx="32" ry="32" fill="#8b949e" stroke="#6e7781" stroke-width="1.6" fill-opacity="0.32"/>
+<ellipse cx="755.2" cy="308" rx="24" ry="24" fill="none" stroke="#6e7781" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="755.2" y="308" font-size="9.2" text-anchor="middle" dominant-baseline="central"><tspan fill="#6e7781">R3</tspan></text>
+<polygon points="514.4,152.8 515.4,147.7 518.3,143.5 522.5,140.6 527.6,139.6 532.7,140.6 536.9,143.5 539.8,147.7 540.8,152.8 540.8,170.4 539.8,175.5 536.9,179.7 532.7,182.6 527.6,183.6 522.5,182.6 518.3,179.7 515.4,175.5 514.4,170.4" fill="#8b949e" stroke="#6e7781" stroke-width="1.6" fill-opacity="0.32"/>
+<text x="527.6" y="190" font-size="8" text-anchor="middle" dominant-baseline="central"><tspan fill="#6e7781">Share</tspan></text>
+<polygon points="774,152.8 775,147.7 777.9,143.5 782.1,140.6 787.2,139.6 792.3,140.6 796.5,143.5 799.4,147.7 800.4,152.8 800.4,170.4 799.4,175.5 796.5,179.7 792.3,182.6 787.2,183.6 782.1,182.6 777.9,179.7 775,175.5 774,170.4" fill="#8b949e" stroke="#6e7781" stroke-width="1.6" fill-opacity="0.32"/>
+<text x="787.2" y="190" font-size="8" text-anchor="middle" dominant-baseline="central"><tspan fill="#6e7781">Options</tspan></text>
+<ellipse cx="655.2" cy="298.8" rx="16" ry="16" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<text x="655.2" y="298.8" font-size="7.6" text-anchor="middle" dominant-baseline="central"><tspan fill="#8b949e" fill-opacity="0.65">PS</tspan></text>
+<ellipse cx="850.4" cy="172.8" rx="20.8" ry="20.8" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<polygon points="850.4,163.2 859.5,179 841.3,179" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 2" stroke-opacity="0.6"/>
+<ellipse cx="896.8" cy="216" rx="20.8" ry="20.8" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<ellipse cx="896.8" cy="216" rx="8.6" ry="8.6" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 2" stroke-opacity="0.6"/>
+<ellipse cx="850.4" cy="257.6" rx="20.8" ry="20.8" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<polyline points="842.7,265.3 858.1,249.9" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 2" stroke-opacity="0.6"/>
+<polyline points="842.7,249.9 858.1,265.3" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 2" stroke-opacity="0.6"/>
+<ellipse cx="803.6" cy="218.4" rx="20.8" ry="20.8" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<polygon points="795.9,226.1 811.3,226.1 811.3,210.7 795.9,210.7" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 2" stroke-opacity="0.6"/>
+<polygon points="441.6,256.4 442,258.6 443.4,260 445.6,260.4 474.4,260.4 476.6,260 478,258.6 478.4,256.4 478.4,234.4 478.8,232.2 480.2,230.8 482.4,230.4 504.4,230.4 506.6,230 508,228.6 508.4,226.4 508.4,197.6 508,195.4 506.6,194 504.4,193.6 482.4,193.6 480.2,193.2 478.8,191.8 478.4,189.6 478.4,167.6 478,165.4 476.6,164 474.4,163.6 445.6,163.6 443.4,164 442,165.4 441.6,167.6 441.6,189.6 441.2,191.8 439.8,193.2 437.6,193.6 415.6,193.6 413.4,194 412,195.4 411.6,197.6 411.6,226.4 412,228.6 413.4,230 415.6,230.4 437.6,230.4 439.8,230.8 441.2,232.2 441.6,234.4" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3" stroke-opacity="0.6"/>
+<polygon points="441.6,189.6 442,191.8 443.4,193.2 445.6,193.6 474.4,193.6 476.6,193.2 478,191.8 478.4,189.6 478.4,167.6 478,165.4 476.6,164 474.4,163.6 445.6,163.6 443.4,164 442,165.4 441.6,167.6" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<polygon points="460,171.2 454.4,180.8 465.6,180.8" fill="#8b949e" stroke="none" fill-opacity="0.5"/>
+<polygon points="441.6,256.4 442,258.6 443.4,260 445.6,260.4 474.4,260.4 476.6,260 478,258.6 478.4,256.4 478.4,234.4 478,232.2 476.6,230.8 474.4,230.4 445.6,230.4 443.4,230.8 442,232.2 441.6,234.4" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<polygon points="460,252.8 465.6,243.2 454.4,243.2" fill="#8b949e" stroke="none" fill-opacity="0.5"/>
+<polygon points="411.6,226.4 412,228.6 413.4,230 415.6,230.4 437.6,230.4 439.8,230 441.2,228.6 441.6,226.4 441.6,197.6 441.2,195.4 439.8,194 437.6,193.6 415.6,193.6 413.4,194 412,195.4 411.6,197.6" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<polygon points="419.2,212 428.8,217.6 428.8,206.4" fill="#8b949e" stroke="none" fill-opacity="0.5"/>
+<polygon points="478.4,226.4 478.8,228.6 480.2,230 482.4,230.4 504.4,230.4 506.6,230 508,228.6 508.4,226.4 508.4,197.6 508,195.4 506.6,194 504.4,193.6 482.4,193.6 480.2,194 478.8,195.4 478.4,197.6" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<polygon points="500.8,212 491.2,206.4 491.2,217.6" fill="#8b949e" stroke="none" fill-opacity="0.5"/>
+<polygon points="400,127.2 400.5,129.9 402.1,131.5 404.8,132 491.2,132 493.9,131.5 495.5,129.9 496,127.2 496,118.8 495.5,116.1 493.9,114.5 491.2,114 404.8,114 402.1,114.5 400.5,116.1 400,118.8" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3" stroke-opacity="0.55"/>
+<text x="448" y="123" font-size="8" text-anchor="middle" dominant-baseline="central"><tspan fill="#8b949e" fill-opacity="0.65">L1</tspan></text>
+<polygon points="816,127.2 816.5,129.9 818.1,131.5 820.8,132 907.2,132 909.9,131.5 911.5,129.9 912,127.2 912,118.8 911.5,116.1 909.9,114.5 907.2,114 820.8,114 818.1,114.5 816.5,116.1 816,118.8" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3" stroke-opacity="0.55"/>
+<text x="864" y="123" font-size="8" text-anchor="middle" dominant-baseline="central"><tspan fill="#8b949e" fill-opacity="0.65">R1</tspan></text>
+<polygon points="408,103.2 408.5,105.9 410.1,107.5 412.8,108 483.2,108 485.9,107.5 487.5,105.9 488,103.2 488,98.8 487.5,96.1 485.9,94.5 483.2,94 412.8,94 410.1,94.5 408.5,96.1 408,98.8" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3" stroke-opacity="0.55"/>
+<text x="448" y="101" font-size="8" text-anchor="middle" dominant-baseline="central"><tspan fill="#8b949e" fill-opacity="0.65">L2</tspan></text>
+<polygon points="824,103.2 824.5,105.9 826.1,107.5 828.8,108 899.2,108 901.9,107.5 903.5,105.9 904,103.2 904,98.8 903.5,96.1 901.9,94.5 899.2,94 828.8,94 826.1,94.5 824.5,96.1 824,98.8" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="4 3" stroke-opacity="0.55"/>
+<text x="864" y="101" font-size="8" text-anchor="middle" dominant-baseline="central"><tspan fill="#8b949e" fill-opacity="0.65">R2</tspan></text>
+<text x="278" y="87" font-size="15" text-anchor="end" dominant-baseline="central" font-weight="bold"><tspan fill="#6e7781">Touchpad</tspan></text>
+<polyline points="286,87 296,87 575.2,87 575.2,150" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-linejoin="round"/>
+<ellipse cx="575.2" cy="150" rx="2.6" ry="2.6" fill="#d8651a" stroke="none"/>
+<text x="278" y="107.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">1 finger  </tspan><tspan fill="#6e7781">cursor</tspan><tspan fill="#8b949e">   tap </tspan><tspan fill="#6e7781">Left click</tspan></text>
+<text x="278" y="126.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">2 fingers  </tspan><tspan fill="#6e7781">scroll</tspan><tspan fill="#8b949e">   tap </tspan><tspan fill="#6e7781">Middle click</tspan></text>
+<text x="278" y="145.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">click  </tspan><tspan fill="#6e7781">Right click</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Suspend injection</tspan></text>
+<text x="278" y="260" font-size="15" text-anchor="end" dominant-baseline="central" font-weight="bold"><tspan fill="#6e7781">Left stick</tspan></text>
+<polyline points="286,260 296,260 342,308 511.2,308" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-linejoin="round"/>
+<ellipse cx="511.2" cy="308" rx="2.6" ry="2.6" fill="#d8651a" stroke="none"/>
+<text x="278" y="280.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">↑  </tspan><tspan fill="#6e7781">Ctrl+Shift+Tab</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Win+Tab</tspan></text>
+<text x="278" y="299.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">↓  </tspan><tspan fill="#6e7781">Ctrl+Tab</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Centre cursor</tspan></text>
+<text x="278" y="318.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">←  </tspan><tspan fill="#6e7781">Alt+Shift+Tab</tspan></text>
+<text x="278" y="337.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">→  </tspan><tspan fill="#6e7781">Alt+Tab</tspan></text>
+<text x="278" y="356.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">click  </tspan><tspan fill="#d8651a">hold = Fn layer</tspan><tspan fill="#8b949e">   tap </tspan><tspan fill="#6e7781">Esc</tspan></text>
+<text x="1034" y="164" font-size="15" text-anchor="start" dominant-baseline="central" font-weight="bold"><tspan fill="#6e7781">Right stick</tspan></text>
+<polyline points="1026,164 1016,164 970,308 799.2,308" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-linejoin="round"/>
+<ellipse cx="799.2" cy="308" rx="2.6" ry="2.6" fill="#d8651a" stroke="none"/>
+<text x="1034" y="184.5" font-size="14" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">↑  </tspan><tspan fill="#6e7781">Up</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Ctrl+K Ctrl+Up</tspan></text>
+<text x="1034" y="203.5" font-size="14" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">↓  </tspan><tspan fill="#6e7781">Down</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Ctrl+K Ctrl+Down</tspan></text>
+<text x="1034" y="222.5" font-size="14" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">←  </tspan><tspan fill="#6e7781">Left</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Ctrl+K Ctrl+Left</tspan></text>
+<text x="1034" y="241.5" font-size="14" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">→  </tspan><tspan fill="#6e7781">Right</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Ctrl+K Ctrl+Right</tspan></text>
+<text x="1034" y="260.5" font-size="14" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">click  </tspan><tspan fill="#6e7781">Enter</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Win+H</tspan></text>
+<text x="278" y="183" font-size="15" text-anchor="end" dominant-baseline="central" font-weight="bold"><tspan fill="#6e7781">Share</tspan></text>
+<polyline points="286,183 296,183 342,154 514.4,154" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-linejoin="round"/>
+<ellipse cx="514.4" cy="154" rx="2.6" ry="2.6" fill="#d8651a" stroke="none"/>
+<text x="278" y="203.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">tap </tspan><tspan fill="#6e7781">Ctrl+C</tspan><tspan fill="#8b949e">   hold </tspan><tspan fill="#6e7781">Shift</tspan></text>
+<text x="278" y="222.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#d8651a" fill-opacity="0.8">Fn </tspan><tspan fill="#d8651a">Win+Shift+S</tspan></text>
+<text x="1034" y="87" font-size="15" text-anchor="start" dominant-baseline="central" font-weight="bold"><tspan fill="#6e7781">Options</tspan></text>
+<polyline points="1026,87 1016,87 787.2,87 787.2,139.6" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-linejoin="round"/>
+<ellipse cx="787.2" cy="139.6" rx="2.6" ry="2.6" fill="#d8651a" stroke="none"/>
+<text x="1034" y="107.5" font-size="14" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">tap </tspan><tspan fill="#6e7781">Ctrl+V</tspan><tspan fill="#8b949e">   hold </tspan><tspan fill="#6e7781">Ctrl</tspan></text>
+<text x="1034" y="126.5" font-size="14" text-anchor="start" dominant-baseline="central"><tspan fill="#d8651a" fill-opacity="0.8">Fn </tspan><tspan fill="#d8651a">Win+X</tspan></text>
+<polygon points="16,432 16.1,430.9 16.5,430.1 17.1,429.5 17.9,429.1 19,429 39,429 40.1,429.1 40.9,429.5 41.5,430.1 41.9,430.9 42,432 42,440 41.9,441.1 41.5,441.9 40.9,442.5 40.1,442.9 39,443 19,443 17.9,442.9 17.1,442.5 16.5,441.9 16.1,441.1 16,440" fill="#8b949e" stroke="#6e7781" stroke-width="1.6" fill-opacity="0.32"/>
+<text x="50" y="436" font-size="13" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">input on this board</tspan></text>
+<polygon points="196,432 196.1,430.9 196.5,430.1 197.1,429.5 197.9,429.1 199,429 219,429 220.1,429.1 220.9,429.5 221.5,430.1 221.9,430.9 222,432 222,440 221.9,441.1 221.5,441.9 220.9,442.5 220.1,442.9 219,443 199,443 197.9,442.9 197.1,442.5 196.5,441.9 196.1,441.1 196,440" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-dasharray="4 3" stroke-opacity="0.7"/>
+<text x="230" y="436" font-size="13" text-anchor="start" dominant-baseline="central"><tspan fill="#8b949e">not on this board (bare)</tspan></text>
+<text x="406" y="436" font-size="13" text-anchor="start" dominant-baseline="central"><tspan fill="#d8651a">Fn</tspan><tspan fill="#8b949e">  = layer 2, hold Left stick click</tspan></text>
+<text x="1296" y="436" font-size="13" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">mapping.json  →  tools/render_map.py</tspan></text>
+</svg>

@@ -1,0 +1,21 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# runtime files the mapper and the autostart watcher write next to themselves
+autostart.log
+autostart.off
+attention_state.txt
+
+# CAD build outputs - regenerate with cad/variants.py; the shipped matrix lives in stl/
+cad/out/
+*.3mf
+*.gcode
+slices/
+
+# editor / agent tooling
+.vscode/
+.idea/
+.claude/
+.cursor/
