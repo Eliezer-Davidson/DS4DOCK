@@ -61,8 +61,9 @@ that is missing from the file is unbound.
 
 The attention light. attention_state.txt holds one word: "waiting" turns the light bar
 orange, anything else (or no file) is idle. Whatever you wait on can write it. I use it for a
-coding agent: Claude Code hooks in ~/.claude/settings.json - Notification writes "waiting",
-Stop and UserPromptSubmit write "idle" - so the pad glows when the agent needs an answer.
+coding agent: Claude Code hooks in ~/.claude/settings.json - Notification and Stop write
+"waiting", UserPromptSubmit writes "idle", tools/attention.py does the writing - so the pad
+glows when the agent has something for you and clears the moment you answer.
 
 Injection: Windows = SendInput through ctypes (relative mouse motion, high-resolution
 wheel, scan codes; standard library only). Linux = a virtual device on /dev/uinput (evdev).

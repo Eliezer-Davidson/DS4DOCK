@@ -97,17 +97,19 @@ The keyboard's wrist rest was lost. A DualShock 4 was spare. A wrist rest is a f
 
 "Real input" is a button edge, a touch contact or a stick deflection past the deadzone. Raw stick values cannot count: the sticks rest a unit or two off centre, and L2/R2 read 255 permanently with the triggers gone.
 
-**The attention file.** The mapper polls `attention_state.txt` next to the script every 0.25 s (mtime-guarded, so it costs nothing in the 250 Hz loop). The file holds one word, `waiting` or `idle`; a missing file is `idle`. Anything that can write a file can drive the orange light. The documented example is Claude Code: a `Notification` hook writes `waiting`, and `Stop` and `UserPromptSubmit` hooks write `idle`, so the light bar turns orange when the coding agent is waiting for an answer and goes back to normal when you type. `--attention-file` points the mapper somewhere else.
+**The attention file.** The mapper polls `attention_state.txt` next to the script every 0.25 s (mtime-guarded, so it costs nothing in the 250 Hz loop). The file holds one word, `waiting` or `idle`; a missing file is `idle`. Anything that can write a file can drive the orange light. The documented example is Claude Code: a `Notification` hook writes `waiting` (a permission prompt or a question is up), a `Stop` hook writes `waiting` too (a reply has arrived and is waiting to be read), and `UserPromptSubmit` writes `idle` (you are typing again) - so the light bar turns orange whenever the coding agent has something for you and goes back to normal the moment you answer. `--attention-file` points the mapper somewhere else.
 
-The hooks, as they go in Claude Code's `settings.json` (use an absolute path to the file, and on Windows
-`pythonw` rather than `python` so no console flashes):
+The hooks, as they go in Claude Code's `settings.json`. They use the exec form (`command` + `args`, no
+shell), call the small helper `tools/attention.py`, and run in the background so they never hold the
+agent up. Use `pythonw` on Windows so no console flashes, `python3` elsewhere, and the absolute path to
+the helper:
 
 ```json
 {
   "hooks": {
-    "Notification":     [{"hooks": [{"type": "command", "command": "pythonw -c \"open(r'/path/to/ds4-dock/attention_state.txt', 'w').write('waiting')\""}]}],
-    "Stop":             [{"hooks": [{"type": "command", "command": "pythonw -c \"open(r'/path/to/ds4-dock/attention_state.txt', 'w').write('idle')\""}]}],
-    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "pythonw -c \"open(r'/path/to/ds4-dock/attention_state.txt', 'w').write('idle')\""}]}]
+    "Notification":     [{"hooks": [{"type": "command", "command": "pythonw", "args": ["/path/to/ds4-dock/tools/attention.py", "waiting"], "async": true, "timeout": 5}]}],
+    "Stop":             [{"hooks": [{"type": "command", "command": "pythonw", "args": ["/path/to/ds4-dock/tools/attention.py", "waiting"], "async": true, "timeout": 5}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "pythonw", "args": ["/path/to/ds4-dock/tools/attention.py", "idle"],    "async": true, "timeout": 5}]}]
   }
 }
 ```
