@@ -27,12 +27,12 @@ Default control map (v2, 2026-10-21). docs/CONTROLS.md has the reasoning behind 
 
 The shell is cut away, so the ONLY inputs that physically exist are the touchpad and its click,
 both sticks and their clicks (L3/R3), Share and Options. Five buttons. One momentary layer -
-Fn, which is L3 held - buys back the rest. L2/R2 sit at 255 with the triggers gone; the mapper
-refuses to bind them. The d-pad, face-button, L1/R1 and PS entries in the map are kept because
+Fn, which is L3 held - buys back the rest. L2/R2 read pressed for good with the triggers gone
+(and R2's analogue value wanders); the mapper refuses to bind them. The d-pad, face-button, L1/R1 and PS entries in the map are kept because
 they cost nothing, can never fire, and work again if a shell is ever refitted.
 
     touchpad 1 finger -> cursor, tap = left click   2 fingers -> scroll, tap = middle click
-    pad click         -> right click                Fn + pad click -> suspend all injection
+    pad click         -> right click                Fn + pad click -> screen off (see below)
     right stick       -> arrows, repeating faster the further it is pushed
                          Fn + it -> VS Code pane focus (Ctrl+K Ctrl+arrow), once per push
     left stick flick  -> left/right = previous/next app window (Alt+Shift+Tab / Alt+Tab)
@@ -44,17 +44,20 @@ they cost nothing, can never fire, and work again if a shell is ever refitted.
                          Fn + it -> snip tool (Win+Shift+S)
     Options           -> tap = Ctrl+V   hold = Ctrl  (so the stick moves by word)
                          Fn + it -> Win+X
-    light bar         -> suspended red > attention orange > Fn magenta
-                         > in use blue > idle OFF. Battery colour for 2 s on plug-in.
+    light bar         -> suspended red > screen off: dark, or orange if attention is set
+                         > attention orange > Fn magenta > in use blue > idle OFF.
+                         Battery colour for 2 s on plug-in.
 
 The control map file. mapping.json is plain JSON; the shipped one is exactly the map above.
 A binding is {"key": "ctrl+shift+tab"} (a key, a chord joined with +, or chords in sequence
 separated by spaces: "ctrl+k ctrl+left"), {"mouse": "left"|"right"|"middle"},
-{"action": "suspend"|"cursor_centre"}, or null. Each button has either "press" (held while
+{"action": "screen_off"|"suspend"|"cursor_centre"}, or null. Each button has either "press" (held while
 the button is down) or "tap" + "hold" (a short press fires tap on release, a long one engages
 hold - a modifier, usually; "hold" on its own is allowed and means a short press does nothing),
-plus "fn" for the layer. Sticks take a key per direction - except the left stick's Fn flicks,
-which take any binding (a mouse binding clicks once per flick) - and the touchpad its gestures.
+plus "fn" for the layer. screen_off and suspend go only on a button's "press" or "fn" slot, so
+the same press can always undo them. Sticks take a key per direction - except the left stick's
+Fn flicks, which also take a mouse button (it clicks once per flick) or cursor_centre - and the
+touchpad its gestures.
 Unknown names and bad specs are refused with a message that names the slot, so a typo cannot
 silently unbind anything. Start from --dump-map FILE rather than from an empty file: an input
 that is missing from the file is unbound.
@@ -64,6 +67,21 @@ orange, anything else (or no file) is idle. Whatever you wait on can write it. I
 coding agent: Claude Code hooks in ~/.claude/settings.json - Notification and Stop write
 "waiting", UserPromptSubmit writes "idle", tools/attention.py does the writing - so the pad
 glows when the agent has something for you and clears the moment you answer.
+
+Screen off (Fn + pad click). Every screen goes black and everything else keeps running. It is a
+black curtain, not a monitor-off: on Modern Standby laptops Windows treats a monitor-off like the
+power button and drops the whole PC into standby, so instead each monitor gets a black topmost
+window and the mapper tells Windows the display is in use (tune key screen_off_keep_awake), which
+also keeps the PC from sleeping. An OLED panel is then dark; an LCD keeps its backlight. While it
+is dark the pad injects nothing, so a palm on the touchpad cannot lift it. A key, the mouse or a
+touch on the screen brings it back, and so does the same chord again; the curtain watches the
+keyboard and the mouse itself, because Windows' own idle clock counts the pad too (_BlackCurtain
+says why). Held keys are let go first and the curtain goes up SCREEN_OFF_DELAY_S later; the chord
+again in between calls it off. The light bar goes dark too, except orange while the attention
+file says "waiting". Windows only for now. Elsewhere (Linux, and --no-inject) held keys are still
+let go and the pad and its light are quiet for SCREEN_OFF_DELAY_S, then the mapper carries on as
+normal; Linux prints one line saying so. "suspend" - injection off, screen untouched - is still
+an action a map can bind; it is just no longer on a chord by default.
 
 Injection: Windows = SendInput through ctypes (relative mouse motion, high-resolution
 wheel, scan codes; standard library only). Linux = a virtual device on /dev/uinput (evdev).
@@ -117,7 +135,15 @@ KEYMAP_L2 = {       # layer 2 - momentary, held open by Fn (L3). PS is gone with
 MOUSEMAP = {"Pad": "right"}                    # button -> mouse button, held while pressed
 MOUSEMAP_L2 = {}                               # the same under Fn
 ACTIONS = {}                                   # button -> one-shot action on press
-ACTIONS_L2 = {"Pad": "suspend"}                # under Fn. "suspend" toggles all injection off/on.
+ACTIONS_L2 = {"Pad": "screen_off"}             # under Fn: the screen goes dark until a key (2026-10-26)
+SCREEN_OFF_DELAY_S = 0.4                       # held keys are let go first; the screen goes dark this much later
+DARK_GRACE_S = 0.5                             # a key or the mouse this soon after the curtain goes up is a
+                                               # hand still settling, and does not lift it
+DARK_REASSERT_S = 30.0                         # the keep-awake request is renewed this often while dark
+CURTAIN_LOST_S = 5.0                           # unchecked this long, the curtain comes down by itself
+BATTERY_GUARD_PCT = 20                         # on battery below this, the PC is no longer held awake
+LIFTED_BY = {"input": "a key, the mouse or a touch",            # the mapper's note, by lifted_by()
+             "lost": "the curtain stopped hearing from the mapper"}
 FN_BUTTON = "L3"                               # HELD = layer 2. Tapped = FN_TAP. None = no layer.
 FN_TAP = "esc"                                 # Esc was on Circle, which no longer exists
 TAP_KEY = {"Share": "ctrl+c", "Options": "ctrl+v"}   # fired on release, if it was a tap
@@ -162,6 +188,8 @@ TUNE = {
     "rstick_rate_min": 4.0,      # right stick as arrows: keys/s just past the deadzone ...
     "rstick_rate_max": 25.0,     # ... and keys/s at full deflection
     "led_idle_s": 2.0,           # the light stays blue this long after the last real input
+    "screen_off_keep_awake": True,   # while the screen is blacked out, Windows keeps the display and the
+                                     # PC awake (false: its own display and sleep timers apply as usual)
 }
 TUNE_RANGE = {                   # lo..hi for every number above, inclusive. The ceilings are generous,
     "touch_gain": (0, 20),       # well past any useful value, and inside them every product in
@@ -266,6 +294,12 @@ def led_report(rgb, bt=False, flash=(0, 0)):
 #
 # Common interface:  move(dx, dy) px   scroll(v, h) in wheel units (120 = one notch,
 # positive = up / right)   click(button, down)   key(name, down)   centre()   close()
+# and five for screen off, real only on Windows (stubs elsewhere):
+#   display_off() -> bool   black every screen out; False = cannot, and the mapper stays normal
+#   display_on()            lift the curtain     display_dark() -> bool  still up? (also a heartbeat)
+#   keep_awake(on)          the display and the PC count as in use while dark, or stop
+#   lifted_by() -> str or None   why the curtain came down by itself: "input" (a key, the mouse,
+#                           a touch) or "lost" (the mapper stopped checking on it); None if it did not
 # repeat_delay / repeat_period: the system keyboard auto-repeat timing, in seconds.
 
 KEY_NAMES = ["enter", "esc", "up", "down", "left", "right", "backspace", "space", "tab",
@@ -275,7 +309,8 @@ KEY_NAMES = ["enter", "esc", "up", "down", "left", "right", "backspace", "space"
 
 
 class NullInjector:
-    """Prints what it would do. Used for --no-inject and --selftest."""
+    """Injects nothing. --no-inject (and a failed injector setup) use it silently; the self-test's
+    Recorder subclass turns verbose on, which prints each call."""
     name = "none"
     repeat_delay, repeat_period = 0.5, 1 / 30
 
@@ -301,6 +336,25 @@ class NullInjector:
     def centre(self):
         if self.verbose:
             print("  centre cursor")
+
+    def display_off(self):
+        """--no-inject changes nothing on the system, so the screen stays on. False tells the
+        mapper not to go quiet over a screen that is still lit."""
+        if self.verbose:
+            print("  screen off (not with --no-inject)")
+        return False
+
+    def display_on(self):
+        pass
+
+    def display_dark(self):
+        return False
+
+    def lifted_by(self):
+        return None
+
+    def keep_awake(self, on):
+        pass
 
     def close(self):
         pass
@@ -372,6 +426,26 @@ class EvdevInjector:
     def centre(self):
         pass        # a relative uinput device has no absolute positioning; not supported on Linux yet
 
+    def display_off(self):
+        # X11 has DPMS and GNOME on Wayland has a D-Bus call, but the mapper runs as root here and
+        # neither is reachable from root without the user's session. Not yet.
+        if not getattr(self, "_said_screen", False):
+            print("\n! screen_off: turning the screen off is Windows-only for now")
+            self._said_screen = True
+        return False
+
+    def display_on(self):
+        pass
+
+    def display_dark(self):
+        return False
+
+    def lifted_by(self):
+        return None
+
+    def keep_awake(self, on):
+        pass
+
     def close(self):
         self.ui.close()
 
@@ -435,6 +509,23 @@ class SendInputInjector:
         self.user32.SystemParametersInfoW(0x0A, 0, ctypes.byref(speed), 0)
         self.repeat_delay = 0.25 * (delay.value + 1)
         self.repeat_period = 1.0 / (2.5 + 27.5 * speed.value / 31)
+        # screen off: the execution-state request that keeps the display and the PC awake while
+        # dark, and the battery level that limits it. The curtain itself (_BlackCurtain), which
+        # also watches the keyboard and the mouse, is only built the first time it is needed.
+
+        class SYSTEM_POWER_STATUS(ctypes.Structure):          # c_ubyte, not wintypes.BYTE: 255 = unknown
+            _fields_ = [("ACLineStatus", ctypes.c_ubyte), ("BatteryFlag", ctypes.c_ubyte),
+                        ("BatteryLifePercent", ctypes.c_ubyte), ("SystemStatusFlag", ctypes.c_ubyte),
+                        ("BatteryLifeTime", w.DWORD), ("BatteryFullLifeTime", w.DWORD)]
+
+        self.SYSTEM_POWER_STATUS = SYSTEM_POWER_STATUS
+        self.kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        self.kernel32.SetThreadExecutionState.argtypes = (w.DWORD,)
+        self.kernel32.SetThreadExecutionState.restype = w.DWORD
+        self.kernel32.GetSystemPowerStatus.argtypes = (ctypes.POINTER(SYSTEM_POWER_STATUS),)
+        self.kernel32.GetSystemPowerStatus.restype = w.BOOL
+        self.curtain = None
+        self._said_battery = False
 
     def _send(self, *events):
         arr = (self.INPUT * len(events))(*events)
@@ -478,8 +569,420 @@ class SendInputInjector:
         # absolute coordinates run 0..65535 across the primary monitor
         self._send(self._mouse(self.MOVE | self.ABSOLUTE, 32768, 32768))
 
+    def display_off(self):
+        """Black out every screen - see _BlackCurtain for why it is not a monitor-off. True once
+        the curtain is up; False if it could not be raised, and then the mapper stays normal."""
+        self._said_battery = False
+        try:
+            if self.curtain is None:
+                self.curtain = _BlackCurtain()
+            if self.curtain.up():
+                return True
+            why = self.curtain.error or "no reason given"
+        except Exception as ex:          # noqa: BLE001 - a missing API or a failed call: stay normal
+            why = str(ex)
+        print(f"\n! screen_off: could not black the screen out ({why})", file=sys.stderr)
+        return False
+
+    def display_on(self):
+        if self.curtain is not None:
+            self.curtain.down()
+
+    def display_dark(self):
+        """Is the curtain still up? The mapper asks on every report while dark, which doubles as
+        a heartbeat: if it stops asking for CURTAIN_LOST_S, the curtain comes down by itself."""
+        return self.curtain is not None and self.curtain.still_up()
+
+    def lifted_by(self):
+        """Why the curtain came down by itself - "input" or "lost" - or None if it did not."""
+        return self.curtain.lifted_by if self.curtain is not None else None
+
+    def keep_awake(self, on):
+        """ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED while the screen is blacked
+        out: as far as Windows is concerned the display is in use, so neither its display timer
+        nor its sleep timer fires and no Modern Standby session ever begins. The mapper renews it
+        every DARK_REASSERT_S. On battery below BATTERY_GUARD_PCT it is let go instead and
+        Windows' own timers take over - though with the dock plugged in they may never run out,
+        since Windows counts the floating R2 as activity (docs/HARDWARE.md; untested). The
+        request belongs to this thread and ends with the process, so a crash cannot leave the PC
+        held awake."""
+        if on and self._battery_low():
+            if not self._said_battery:
+                print(f"\n! screen_off: battery under {BATTERY_GUARD_PCT}% - no longer keeping the PC awake",
+                      file=sys.stderr)
+                self._said_battery = True
+            on = False
+        self.kernel32.SetThreadExecutionState(0x80000003 if on else 0x80000000)
+
+    def _battery_low(self):
+        s = self.SYSTEM_POWER_STATUS()
+        if not self.kernel32.GetSystemPowerStatus(self.ct.byref(s)):
+            return False
+        return s.ACLineStatus == 0 and s.BatteryLifePercent < BATTERY_GUARD_PCT   # 255 = unknown: not low
+
     def close(self):
-        pass
+        self.display_on()
+        self.keep_awake(False)
+
+
+class _BlackCurtain:
+    """Windows 'screen off': one black, topmost window over each monitor that never takes focus.
+
+    Why not switch the monitors off: on a Modern Standby laptop, a WM_SYSCOMMAND / SC_MONITORPOWER
+    display-off is handled like the power button. Windows begins a standby and cancels every
+    keep-awake request any program holds, so downloads, audio and this mapper all stop - reported
+    across Lenovo, Framework and ASUS machines, with Kernel-Power 506 'Reason: SC_MONITORPOWER' in
+    their event logs. A black window is not a display-off at all, so with ES_DISPLAY_REQUIRED held
+    (keep_awake) Windows never begins a standby and everything keeps running. On an OLED panel
+    black is off; an LCD keeps its backlight on.
+
+    The windows belong to a thread of their own with its own message loop, because the HID loop
+    never pumps messages. That thread also lifts the curtain by itself - on a key, the mouse or a
+    touch on the screen, or once the mapper has not checked on it for CURTAIN_LOST_S - so whatever
+    the main loop is doing, nobody is left in front of a black screen they cannot get rid of.
+    Windows belong to the process, so a crash takes them along.
+
+    The keyboard and the mouse are watched through Raw Input, which reaches the curtain while
+    another app has the focus (RIDEV_INPUTSINK), and only while it is up. Not through
+    GetLastInputInfo: Windows counts a game controller's input as activity too, and with the
+    dock's triggers cut away R2 floats, so that clock moves several times a second with nobody
+    there (2026-10-26: 67 moves in 12 s, each within 20 ms of a change in R2's raw value, and
+    as many with the mapper suspended). A touch or a pen on the black screen lands on the
+    curtain itself, as WM_POINTER messages, and so does a click or a wheel turn - which still
+    counts if Windows ever keeps the keyboard and the mouse from reaching the Raw Input sink
+    (perhaps while an elevated window has the focus; untested). The curtain keeps all of it: it
+    handles the pointer messages itself, so a contact is never turned into a click, and it lifts
+    only once every button, finger and pen is up again, so the release lands on the curtain and
+    not on the app beneath, where a bare right-button-up would open a context menu and a side
+    button go Back. Held longer than HELD_LIFT_S it lifts anyway, and that release then does
+    reach the app.
+
+    A display change while it is up (a monitor unplugged or switched off, a new mode) covers the
+    monitors anew before the old windows go, and still_up() keeps answering yes throughout: the
+    mapper takes a single no for the curtain having come down."""
+    CLASS = "ds4dock_black"
+    WM_APP_SHOW, WM_APP_HIDE, WM_APP_LAYOUT, WM_APP_LIFT = 0x8001, 0x8002, 0x8003, 0x8004
+    WM_CLOSE, WM_SETCURSOR, WM_MOUSEACTIVATE, WM_DISPLAYCHANGE, WM_TIMER = 0x10, 0x20, 0x21, 0x7E, 0x113
+    WM_INPUT = 0x00FF
+    WM_POINTERUPDATE, WM_POINTERDOWN, WM_POINTERUP = 0x0245, 0x0246, 0x0247
+    WM_POINTERACTIVATE, WM_POINTERCAPTURECHANGED, PA_NOACTIVATE = 0x024B, 0x024C, 3
+    # what lifts it: Raw Input, a finger or a pen, and the left, right, middle and X buttons and
+    # both wheels landing on the curtain. Never WM_MOUSEMOVE: Windows makes those up when a
+    # window appears or changes place in the z-order, or the cursor is set.
+    LIFT_ON = frozenset((WM_INPUT, WM_POINTERDOWN, 0x0201, 0x0204, 0x0207, 0x020B, 0x020A, 0x020E))
+    # and what it swallows: a release on the curtain must not open a menu or go Back
+    WM_CONTEXTMENU, WM_APPCOMMAND = 0x007B, 0x0319
+    MOUSE_VKS = (0x01, 0x02, 0x04, 0x05, 0x06)           # VK_LBUTTON, RBUTTON, MBUTTON, XBUTTON1, XBUTTON2
+    HELD_LIFT_S = 2.0                                    # a button, finger or pen held longer lifts it anyway
+    RIDEV_REMOVE, RIDEV_INPUTSINK = 0x00000001, 0x00000100
+    MA_NOACTIVATE = 3
+    WS_POPUP = 0x80000000
+    WS_EX = 0x00000008 | 0x00000080 | 0x08000000        # TOPMOST | TOOLWINDOW (no taskbar) | NOACTIVATE
+    SW_SHOWNOACTIVATE = 4
+    SWP = 0x0010 | 0x0040                                # NOACTIVATE | SHOWWINDOW
+    SWP_RAISE = 0x0001 | 0x0002 | 0x0010                 # NOSIZE | NOMOVE | NOACTIVATE
+    TICK_MS = 100                                        # the thread's own timer: heartbeat, z-order
+
+    def __init__(self):
+        import ctypes
+        import threading
+        from ctypes import wintypes as w
+        self.ct, self.w = ctypes, w
+        u = self.u = ctypes.WinDLL("user32", use_last_error=True)
+        k = self.k = ctypes.WinDLL("kernel32", use_last_error=True)
+        g = ctypes.WinDLL("gdi32", use_last_error=True)
+        LRESULT = w.LPARAM                               # pointer-sized, like WPARAM and LPARAM
+        self.WNDPROC = ctypes.WINFUNCTYPE(LRESULT, w.HWND, w.UINT, w.WPARAM, w.LPARAM)
+        self.MONITORENUMPROC = ctypes.WINFUNCTYPE(w.BOOL, w.HMONITOR, w.HDC, ctypes.POINTER(w.RECT), w.LPARAM)
+
+        class WNDCLASSEXW(ctypes.Structure):
+            _fields_ = [("cbSize", w.UINT), ("style", w.UINT), ("lpfnWndProc", self.WNDPROC),
+                        ("cbClsExtra", ctypes.c_int), ("cbWndExtra", ctypes.c_int),
+                        ("hInstance", w.HINSTANCE), ("hIcon", w.HICON), ("hCursor", w.HANDLE),
+                        ("hbrBackground", w.HBRUSH), ("lpszMenuName", w.LPCWSTR),
+                        ("lpszClassName", w.LPCWSTR), ("hIconSm", w.HICON)]
+
+        class MONITORINFO(ctypes.Structure):
+            _fields_ = [("cbSize", w.DWORD), ("rcMonitor", w.RECT), ("rcWork", w.RECT), ("dwFlags", w.DWORD)]
+
+        class RAWINPUTDEVICE(ctypes.Structure):
+            _fields_ = [("usUsagePage", w.USHORT), ("usUsage", w.USHORT), ("dwFlags", w.DWORD),
+                        ("hwndTarget", w.HWND)]
+
+        self.WNDCLASSEXW, self.MONITORINFO, self.RAWINPUTDEVICE = WNDCLASSEXW, MONITORINFO, RAWINPUTDEVICE
+        for fn, args, res in (
+                (u.DefWindowProcW, (w.HWND, w.UINT, w.WPARAM, w.LPARAM), LRESULT),
+                (u.RegisterClassExW, (ctypes.POINTER(WNDCLASSEXW),), w.ATOM),
+                (u.CreateWindowExW, (w.DWORD, w.LPCWSTR, w.LPCWSTR, w.DWORD, ctypes.c_int, ctypes.c_int,
+                                     ctypes.c_int, ctypes.c_int, w.HWND, w.HMENU, w.HINSTANCE, w.LPVOID), w.HWND),
+                (u.DestroyWindow, (w.HWND,), w.BOOL),
+                (u.ShowWindow, (w.HWND, ctypes.c_int), w.BOOL),
+                (u.SetWindowPos, (w.HWND, w.HWND, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, w.UINT), w.BOOL),
+                (u.GetMessageW, (ctypes.POINTER(w.MSG), w.HWND, w.UINT, w.UINT), w.BOOL),
+                (u.PeekMessageW, (ctypes.POINTER(w.MSG), w.HWND, w.UINT, w.UINT, w.UINT), w.BOOL),
+                (u.TranslateMessage, (ctypes.POINTER(w.MSG),), w.BOOL),
+                (u.DispatchMessageW, (ctypes.POINTER(w.MSG),), LRESULT),
+                (u.PostThreadMessageW, (w.DWORD, w.UINT, w.WPARAM, w.LPARAM), w.BOOL),
+                (u.EnumDisplayMonitors, (w.HDC, ctypes.POINTER(w.RECT), self.MONITORENUMPROC, w.LPARAM), w.BOOL),
+                (u.GetMonitorInfoW, (w.HMONITOR, ctypes.POINTER(MONITORINFO)), w.BOOL),
+                (u.SetCursor, (w.HANDLE,), w.HANDLE),
+                (u.GetCursorPos, (ctypes.POINTER(w.POINT),), w.BOOL),
+                (u.SetCursorPos, (ctypes.c_int, ctypes.c_int), w.BOOL),
+                (u.SetTimer, (w.HWND, ctypes.c_size_t, w.UINT, w.LPVOID), ctypes.c_size_t),
+                (u.KillTimer, (w.HWND, ctypes.c_size_t), w.BOOL),
+                (u.RegisterRawInputDevices, (ctypes.POINTER(RAWINPUTDEVICE), w.UINT, w.UINT), w.BOOL),
+                (u.GetAsyncKeyState, (ctypes.c_int,), w.SHORT),
+                (g.GetStockObject, (ctypes.c_int,), w.HGDIOBJ),
+                (k.GetModuleHandleW, (w.LPCWSTR,), w.HMODULE),
+                (k.GetCurrentThreadId, (), w.DWORD)):
+            fn.argtypes, fn.restype = args, res
+        self.black = g.GetStockObject(4)                 # BLACK_BRUSH
+        self.wndproc = self.WNDPROC(self._wndproc)       # must outlive every window of the class
+        self.thread, self.tid, self.class_ok = None, 0, False
+        self.ready, self.shown, self.hidden = threading.Event(), threading.Event(), threading.Event()
+        self.threading = threading
+        self.windows, self.timer, self.ticks = [], 0, 0
+        self.ping = self.grace_until = self.lift_at = 0.0
+        self.is_up = False                    # what still_up() answers; only a real lift clears it
+        self.contacts = set()                 # fingers and pens down on the curtain, by pointer id
+        self.sinking = self.lifting = self.relayout = False   # Raw Input registered; a lift, or a
+                                                               # relayout, already on its way
+        self.lifted_by = self.error = None    # why it came down by itself; why up() failed
+
+    # -------------------------------------------------- the main thread's side
+    def up(self):
+        self.lifted_by = self.error = None
+        if self.thread is None or not self.thread.is_alive():
+            self.ready.clear()
+            self.thread = self.threading.Thread(target=self._run, name="ds4dock-curtain", daemon=True)
+            self.thread.start()
+            if not self.ready.wait(2.0) or not self.class_ok:
+                self.error = self.error or "its window thread did not start"
+                return False
+        self.ping = time.monotonic()
+        self.shown.clear()
+        if not self.u.PostThreadMessageW(self.tid, self.WM_APP_SHOW, 0, 0) or not self.shown.wait(2.0):
+            self.error = "its window thread did not answer"
+            return False
+        if not self.is_up:
+            self.error = self.error or "there was no monitor to cover"
+        return self.is_up
+
+    def down(self):
+        if self.thread is None or not self.thread.is_alive() or not self.tid:
+            return
+        self.hidden.clear()
+        if self.u.PostThreadMessageW(self.tid, self.WM_APP_HIDE, 0, 0):
+            self.hidden.wait(2.0)
+
+    def still_up(self):
+        self.ping = time.monotonic()
+        return self.is_up
+
+    # -------------------------------------------------- the curtain thread
+    def _run(self):
+        ct, w, u = self.ct, self.w, self.u
+        try:
+            try:
+                u.SetThreadDpiAwarenessContext.argtypes = (w.HANDLE,)
+                u.SetThreadDpiAwarenessContext.restype = w.HANDLE
+                u.SetThreadDpiAwarenessContext(ct.c_void_p(-4))   # per-monitor v2: physical pixels
+            except AttributeError:
+                pass                                     # before Windows 10 1607: logical pixels
+            msg = w.MSG()
+            u.PeekMessageW(ct.byref(msg), None, 0, 0, 0)          # gives this thread a message queue
+            self.tid = self.k.GetCurrentThreadId()
+            wc = self.WNDCLASSEXW()
+            wc.cbSize = ct.sizeof(wc)
+            wc.lpfnWndProc = self.wndproc
+            wc.hInstance = self.k.GetModuleHandleW(None)
+            wc.hbrBackground = self.black
+            wc.lpszClassName = self.CLASS
+            self.class_ok = bool(u.RegisterClassExW(ct.byref(wc))) or ct.get_last_error() == 1410   # already there
+            if not self.class_ok:
+                self.error = f"RegisterClassExW failed (error {ct.get_last_error()})"
+        finally:
+            self.ready.set()
+        if not self.class_ok:
+            return
+        try:
+            while u.GetMessageW(ct.byref(msg), None, 0, 0) > 0:
+                if not msg.hWnd and self._dispatch(msg.message):     # ours, and the thread's timer
+                    continue
+                u.TranslateMessage(ct.byref(msg))
+                u.DispatchMessageW(ct.byref(msg))
+        finally:
+            self._hide()
+
+    def _dispatch(self, message):
+        """The curtain thread's own messages, posted to the thread rather than to a window. True
+        if it was one of them."""
+        if message == self.WM_APP_SHOW:
+            self._show(nudge=True)
+        elif message == self.WM_APP_HIDE:
+            self._hide()
+        elif message == self.WM_APP_LIFT:               # from _wndproc: the user is back
+            if self.is_up and not self._held():          # still held: _tick lifts it once it is let go
+                self.lifted_by = "input"                 # before is_up goes, so the mapper reads why
+                self._hide()
+        elif message == self.WM_APP_LAYOUT:             # from _wndproc: the monitors changed
+            self.relayout = False
+            if self.is_up:
+                self._relayout()
+        elif message == self.WM_TIMER:
+            self._tick()
+        else:
+            return False
+        return True
+
+    def _monitors(self):
+        rects = []
+
+        def each(hmon, hdc, lprc, data):
+            mi = self.MONITORINFO()
+            mi.cbSize = self.ct.sizeof(mi)
+            if self.u.GetMonitorInfoW(hmon, self.ct.byref(mi)):
+                r = mi.rcMonitor
+                rects.append((r.left, r.top, r.right - r.left, r.bottom - r.top))
+            return True
+
+        self.u.EnumDisplayMonitors(None, None, self.MONITORENUMPROC(each), 0)
+        return rects
+
+    def _sink(self, hwnd):
+        """Raw Input from the keyboard and the mouse, sent to hwnd even while another app has the
+        focus (RIDEV_INPUTSINK); None takes it away again (RIDEV_REMOVE). Those two only: the
+        gamepad page would bring in the pad itself, 250 reports a second."""
+        rid = (self.RAWINPUTDEVICE * 2)()
+        for r, usage in zip(rid, (0x06, 0x02)):          # generic desktop page: keyboard, mouse
+            r.usUsagePage, r.usUsage = 0x01, usage
+            r.dwFlags = self.RIDEV_INPUTSINK if hwnd else self.RIDEV_REMOVE
+            r.hwndTarget = hwnd
+        return bool(self.u.RegisterRawInputDevices(rid, 2, self.ct.sizeof(self.RAWINPUTDEVICE)))
+
+    def _held(self):
+        """Is a mouse button, a finger or a pen still down? Then whatever woke the curtain is not
+        over, and lifting now would hand its release to the app beneath, where a bare
+        right-button-up opens a context menu and a side button goes Back."""
+        return bool(self.contacts) or any(self.u.GetAsyncKeyState(vk) & 0x8000 for vk in self.MOUSE_VKS)
+
+    def _cover(self):
+        """One black window over each monitor, on top and shown without taking the focus."""
+        ct, u = self.ct, self.u
+        hinst = self.k.GetModuleHandleW(None)
+        made = []
+        for x, y, cx, cy in self._monitors():
+            h = u.CreateWindowExW(self.WS_EX, self.CLASS, "", self.WS_POPUP, x, y, cx, cy,
+                                  None, None, hinst, None)
+            if h:
+                made.append(h)
+                u.ShowWindow(h, self.SW_SHOWNOACTIVATE)
+                u.SetWindowPos(h, ct.c_void_p(-1), x, y, cx, cy, self.SWP)          # HWND_TOPMOST
+        return made
+
+    def _show(self, nudge):
+        ct, u = self.ct, self.u
+        self.grace_until = time.monotonic() + DARK_GRACE_S
+        self.lifting, self.contacts = False, set()
+        if not self.windows:
+            self.windows = self._cover()
+            if self.windows and not self._sink(self.windows[0]):
+                self.error = f"the keyboard and the mouse could not be watched (error {ct.get_last_error()})"
+                self._hide()                             # a curtain nothing could lift is worse than none
+            if self.windows:
+                self.sinking = True
+                self.timer = u.SetTimer(None, 0, self.TICK_MS, None)
+                if nudge:                                # a WM_SETCURSOR, so the arrow goes black too
+                    p = self.w.POINT()
+                    if u.GetCursorPos(ct.byref(p)):
+                        u.SetCursorPos(p.x + 1, p.y)
+                        u.SetCursorPos(p.x, p.y)
+        self.is_up = bool(self.windows)
+        self.shown.set()
+
+    def _relayout(self):
+        """The monitors changed while it is up: cover them as they are now, move the Raw Input
+        sink to the new windows (registering again replaces the target), and only then let the
+        old windows go - so no screen shows through, and is_up never drops in between. If no
+        new cover can be made, or watched, the old one stays."""
+        new = self._cover()
+        if not new or not self._sink(new[0]):
+            for h in new:
+                self.u.DestroyWindow(h)
+            return
+        old, self.windows = self.windows, new
+        for h in old:
+            self.u.DestroyWindow(h)
+
+    def _hide(self):
+        self.is_up = False
+        if self.timer:
+            self.u.KillTimer(None, self.timer)
+            self.timer = 0
+        if self.sinking:                                 # before the window it reports to is gone
+            self._sink(None)
+            self.sinking = False
+        for h in self.windows:
+            self.u.DestroyWindow(h)
+        self.windows = []
+        self.hidden.set()
+
+    def _tick(self):
+        """Every TICK_MS while up: the mapper gone quiet, and every 2 s the windows put back on top
+        of anything that rose above them. The user coming back arrives as WM_INPUT instead."""
+        if not self.is_up:
+            return
+        if time.monotonic() - self.ping > CURTAIN_LOST_S:
+            self.lifted_by = "lost"
+            self._hide()
+            return
+        if self.lifting and (not self._held() or time.monotonic() - self.lift_at > self.HELD_LIFT_S):
+            self.lifted_by = "input"                     # the click or the tap that woke it is over
+            self._hide()
+            return
+        self.ticks += 1
+        if self.ticks % 20 == 0:
+            for h in self.windows:
+                self.u.SetWindowPos(h, self.ct.c_void_p(-1), 0, 0, 0, 0, self.SWP_RAISE)
+
+    def _wndproc(self, hwnd, msg, wp, lp):
+        try:
+            if msg in self.LIFT_ON:
+                # a key, the mouse, a finger or a pen: the user is back, unless the curtain has only
+                # just gone up. Lifted from the message loop, not from inside one of its own
+                # windows' messages; WM_INPUT still goes on to DefWindowProc, which frees its data.
+                if self.is_up and not self.lifting and time.monotonic() >= self.grace_until:
+                    self.lifting, self.lift_at = True, time.monotonic()
+                    self.u.PostThreadMessageW(self.tid, self.WM_APP_LIFT, 0, 0)
+            # a finger or a pen: handled here, so Windows never turns the contact into a mouse
+            # click, and tracked until it is up (the pointer id is the low word of wParam)
+            if msg == self.WM_POINTERDOWN:
+                self.contacts.add(wp & 0xFFFF)
+                return 0
+            if msg == self.WM_POINTERUP or msg == self.WM_POINTERCAPTURECHANGED:
+                self.contacts.discard(wp & 0xFFFF)
+                return 0
+            if msg == self.WM_POINTERUPDATE:
+                return 0
+            if msg == self.WM_POINTERACTIVATE:
+                return self.PA_NOACTIVATE                # a touch never pulls focus off the app beneath
+            if msg == self.WM_CONTEXTMENU or msg == self.WM_APPCOMMAND:
+                return 1                                 # a release on the curtain does nothing
+            if msg == self.WM_SETCURSOR:
+                self.u.SetCursor(None)                   # no arrow on a black screen
+                return 1
+            if msg == self.WM_MOUSEACTIVATE:
+                return self.MA_NOACTIVATE                # a click never pulls focus off the app beneath
+            if msg == self.WM_DISPLAYCHANGE:
+                if not self.relayout:                    # every window gets one; one rebuild serves all
+                    self.relayout = True
+                    self.u.PostThreadMessageW(self.tid, self.WM_APP_LAYOUT, 0, 0)
+                return 0
+            if msg == self.WM_CLOSE:
+                return 0                                 # only the mapper lifts the curtain
+        except Exception:                                # noqa: BLE001 - never raise into Windows
+            pass
+        return self.u.DefWindowProcW(hwnd, msg, wp, lp)
 
 
 def make_injector(enabled):
@@ -556,8 +1059,14 @@ class Mapper:
         self.flick = {"x": 0, "y": 0}   # left stick: -1/0/+1 = direction already fired
         self.rs_flick = {"x": 0, "y": 0}  # right stick, same, for the Fn pane-focus flicks
         self.rs_dir, self.rs_next = None, 0.0   # right stick as arrows: direction and next fire
+        self.rs_armed = True            # False after a settle until the right stick has been back at rest
         self.fn_t, self.fn_used = 0.0, False    # Fn press time; whether anything used the layer
         self.suspended = False          # the "suspend" action: inject nothing at all
+        self.dark = False               # the "screen_off" action: the screen is dark, the pad silent
+        self.dark_at = None             # when the screen goes off - held keys are let go first
+        self.dark_since = 0.0           # when the curtain went up
+        self.dark_awake_at = 0.0        # when the keep-awake request is next renewed
+        self.note = None                # main() points this at stderr: a line when the screen goes and comes
         self.last_input = 0.0           # last real input, for the light bar
         self.attention_mtime, self.attention = 0.0, "idle"    # 'waiting' = something wants you
         self.attention_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -599,10 +1108,73 @@ class Mapper:
             self.inj.key(p, down)
 
     def _action(self, action):
-        """One-shot actions. "suspend" is not here: it is handled at the top of step(), because
-        it has to keep working while everything else is switched off."""
+        """One-shot actions. "suspend" and "screen_off" are not here: they are handled at the top
+        of step(), because they have to keep working while everything else is switched off."""
         if action == "cursor_centre":
             self.inj.centre()
+
+    def _settle(self, st, now):
+        """Take the pad as it is right now as the new reference, as if this report were the
+        first one: no cursor jump from motion made while the mapper was not looking, no tap from
+        a finger that was already down, no flick or arrows from a stick that is already pushed,
+        no Esc from an Fn press that began while the mapper was not listening. Used on the way
+        into and out of the two quiet modes."""
+        fingers = [(tid, x, y) for active, tid, x, y in st["touch"] if active]
+        self.prev_pos = {tid: (x, y) for tid, x, y in fingers}
+        self.start_pos = dict(self.prev_pos)
+        self.fingers = min(len(fingers), 2)
+        self.session = [now, len(fingers), 0.0, True] if fingers else None    # cancelled: no tap
+        self.acc, self.wheel = [0.0, 0.0], [0.0, 0.0]
+        self.rs_dir, self.rs_next = None, 0.0
+        self.rs_armed = False               # the right stick fires again once it has been back at rest
+        self.flick = {"x": 1, "y": 1}       # re-armed only once each stick is back inside flick_off
+        self.rs_flick = {"x": 1, "y": 1}
+        if FN_BUTTON is not None and FN_BUTTON in st["buttons"]:
+            self.fn_used = True             # its release is not a tap, whatever the time
+
+    def _can_toggle(self, action):
+        """Whether a button in the map as it stands can still press `action`. A live reload can
+        take it away, and a quiet mode left with no way back would never end."""
+        return action in ACTIONS.values() or (FN_BUTTON is not None and action in ACTIONS_L2.values())
+
+    def _tend_dark(self, st, now):
+        """While the screen is dark, or about to be. The curtain goes up SCREEN_OFF_DELAY_S after
+        the chord, once held keys are let go. From then on the curtain watches the keyboard and the
+        mouse itself (_BlackCurtain says why not the idle clock), so what is left here is renewing
+        the keep-awake request every DARK_REASSERT_S and noticing when the curtain came down by
+        itself. Asking whether it is still up, on every report, is also its heartbeat."""
+        if self.dark_at is not None:            # not up yet
+            if now < self.dark_at:
+                return
+            self.dark_at = None
+            if not self.inj.display_off():      # nothing can black this screen out: stay normal
+                self.dark = False
+                self._settle(st, now)
+                return
+            self.dark_since, self.dark_awake_at = now, now
+            self._note("screen off")
+        elif not self.inj.display_dark():       # lifted on its own: the user is back, or it lost us
+            self._leave_dark(st, now, LIFTED_BY.get(self.inj.lifted_by(), "the curtain came down"))
+            return
+        if self.tune.get("screen_off_keep_awake", True) and now >= self.dark_awake_at:
+            self.inj.keep_awake(True)           # and renewed every DARK_REASSERT_S
+            self.dark_awake_at = now + DARK_REASSERT_S
+
+    def _leave_dark(self, st, now, why):
+        """Back to normal: the curtain down if it had gone up (if not, the switch-off is simply
+        called off), the keep-awake request let go, and the pad's current state taken as the new
+        reference."""
+        was_up = self.dark_at is None
+        self.dark, self.dark_at = False, None
+        if was_up:
+            self.inj.display_on()
+            self._note(f"screen back after {now - self.dark_since:.0f} s ({why})")
+        self.inj.keep_awake(False)
+        self._settle(st, now)
+
+    def _note(self, text):
+        if self.note:
+            self.note(text)
 
     def step(self, st):
         t = self.tune
@@ -618,26 +1190,47 @@ class Mapper:
             self.layer2, self.fn_t, self.fn_used = True, now, False
         if FN_BUTTON in self.prev_buttons - b:
             self.layer2 = False
-            if FN_TAP and not self.fn_used and not self.suspended and now - self.fn_t < t["hold_s"]:
+            if (FN_TAP and not self.fn_used and not self.suspended and not self.dark
+                    and now - self.fn_t < t["hold_s"]):
                 self._key(FN_TAP, True)
                 self._key(FN_TAP, False)
         if self.layer2 and (pressed - {FN_BUTTON}):
             self.fn_used = True
-        # The "suspend" action (Fn + pad click by default) toggles all injection. Everything is
-        # released first, and while suspended the only thing still tracked is the button that
-        # resumes - which is why this runs before the early return and outside _action().
+        # The two mode actions - "screen_off" (Fn + pad click by default) and "suspend" - have to
+        # keep working while everything else is switched off, which is why they run here, before
+        # the early return and outside _action(). Going into either lets go of everything held
+        # first; going into or out of either takes the pad's current state as the new reference.
         for name in sorted(pressed):
-            if (ACTIONS_L2 if self.layer2 else ACTIONS).get(name) == "suspend":
+            act = (ACTIONS_L2 if self.layer2 else ACTIONS).get(name)
+            if act == "suspend":
                 self.suspended = not self.suspended
                 self.fn_used = True
                 self.release_all()
+                self._settle(st, now)
                 pressed = pressed - {name}
-        if self.suspended:
+            elif act == "screen_off":
+                self.fn_used = True
+                pressed = pressed - {name}
+                if self.dark:
+                    self._leave_dark(st, now, "the chord")
+                else:
+                    self.release_all()
+                    self.dark, self.dark_at = True, now + SCREEN_OFF_DELAY_S
+                    self._settle(st, now)
+        # a live reload can take the way back away: a quiet mode the map can no longer toggle ends
+        if self.suspended and not self._can_toggle("suspend"):
+            self.suspended = False
+            self._settle(st, now)
+        if self.dark and not self._can_toggle("screen_off"):
+            self._leave_dark(st, now, "the map no longer has a way back")
+        if self.dark:
+            self._tend_dark(st, now)
+        if self.suspended or self.dark:
             self.prev_buttons = set(b)
             return
         # --- activity, for the light bar. Buttons, touch, or deflection PAST the deadzone only:
-        # the sticks jitter a unit or two at rest, and L2/R2 are stuck at 255 with the triggers
-        # gone, so neither raw value can be allowed to count as use.
+        # the sticks jitter a unit or two at rest, and L2/R2 read pressed for good with the
+        # triggers gone (R2 wandering besides), so neither raw value can be allowed to count as use.
         if ((b - {"L2", "R2"}) or any(a for a, *_ in st["touch"])
                 or curve(st["lx"], t["stick_deadzone"], 1.0) or curve(st["ly"], t["stick_deadzone"], 1.0)
                 or curve(st["rx"], t["stick_deadzone"], 1.0) or curve(st["ry"], t["stick_deadzone"], 1.0)):
@@ -740,6 +1333,8 @@ class Mapper:
             rx = curve(st["rx"], t["stick_deadzone"], t["stick_expo"])
             ry = curve(st["ry"], t["stick_deadzone"], t["stick_expo"])
             mag = max(abs(rx), abs(ry))
+            if mag <= 0:
+                self.rs_armed = True            # back at rest, so a settle no longer holds the arrows
             if self.layer2:
                 self.rs_dir, self.rs_next = None, 0.0
                 for axis, v, other, neg, pos in (("x", rx, ry, "W", "E"), ("y", ry, rx, "N", "S")):
@@ -754,7 +1349,7 @@ class Mapper:
                         self.rs_flick[axis] = 0
             elif mag <= 0:
                 self.rs_dir, self.rs_next = None, 0.0
-            else:
+            elif self.rs_armed:                 # not while still pushed from before a settle
                 # dominant axis, so a diagonal push resolves to one arrow and not two
                 d = ("E" if rx > 0 else "W") if abs(rx) >= abs(ry) else ("S" if ry > 0 else "N")
                 if d != self.rs_dir or now >= self.rs_next:
@@ -766,8 +1361,12 @@ class Mapper:
                     self.rs_dir, self.rs_next = d, now + 1.0 / rate
         elif self.stick_mouse:
             dz, ex = t["stick_deadzone"], t["stick_expo"]
-            self.acc[0] += curve(st["rx"], dz, ex) * t["stick_max_px"]
-            self.acc[1] += curve(st["ry"], dz, ex) * t["stick_max_px"]
+            cx, cy = curve(st["rx"], dz, ex), curve(st["ry"], dz, ex)
+            if not (cx or cy):
+                self.rs_armed = True
+            elif self.rs_armed:                 # the same hold-off after a settle as the arrows
+                self.acc[0] += cx * t["stick_max_px"]
+                self.acc[1] += cy * t["stick_max_px"]
         dx, dy = int(self.acc[0]), int(self.acc[1])
         if dx or dy:
             self.inj.move(dx, dy)
@@ -813,7 +1412,7 @@ class Mapper:
         self.held.clear()
 
 
-def led_for(st, layer2, active=False, attention=False, suspended=False, grace=False):
+def led_for(st, layer2, active=False, attention=False, suspended=False, grace=False, dark=False):
     """v2: the light is not on all the time. Highest priority wins; idle is off. Every state is
     a STEADY colour - I ruled out flashing on 2026-10-21, so the report's flash bytes are
     left at their default of zero.
@@ -823,6 +1422,8 @@ def led_for(st, layer2, active=False, attention=False, suspended=False, grace=Fa
     forever, so it says nothing after that."""
     if suspended:
         return LED_COLOURS["suspended"]
+    if dark:                    # the screen is off, and so is the light - unless something wants you
+        return LED_COLOURS["attention"] if attention else LED_COLOURS["off"]
     if attention:
         return LED_COLOURS["attention"]
     if layer2:
@@ -980,11 +1581,15 @@ BUTTONS = ("Pad", "L3", "R3", "Share", "Options", "Cross", "Circle", "Triangle",
            "dpad_N", "dpad_S", "dpad_W", "dpad_E", "L1", "R1", "L2", "R2", "PS")
 RESERVED_BUTTONS = {        # refused by the loader; the text is the reason the editor shows
     "L2": "L2 reads as fully pressed all the time once its trigger is removed, so it cannot be bound",
-    "R2": "R2 reads as fully pressed all the time once its trigger is removed, so it cannot be bound",
+    "R2": "R2 reads as pressed all the time once its trigger is removed, and its analogue value wanders, "
+          "so it cannot be bound",
 }
 DIRECTIONS = ("N", "S", "W", "E")
 MOUSE_BUTTONS = ("left", "right", "middle")
 ACTION_NAMES = {            # action -> what it does
+    "screen_off": "black out every screen while everything keeps running (Windows only; elsewhere the pad "
+                  "just goes quiet for 0.4 s); any key or mouse input brings it back, and so does the same "
+                  "press again. The pad is silent while it is dark",
     "suspend": "switch all injection off; the same press switches it back on. "
                "A button's press or fn slot only, so there is always a way back",
     "cursor_centre": "put the cursor in the middle of the primary screen",
@@ -1451,6 +2056,7 @@ def main():
         print(f"tune file: {tune_path} (live)")
     print("feel:", tune_summary())
     mapper = Mapper(inj, pad_mouse=not args.no_pad_mouse, stick_mouse=not args.no_stick_mouse)
+    mapper.note = lambda s: print(f"\n{time.strftime('%Y-%m-%d %H:%M:%S')} {s}", file=sys.stderr, flush=True)
     if args.attention_file:
         mapper.attention_file = args.attention_file
     mode = {"bt": None}
@@ -1480,7 +2086,7 @@ def main():
                           # gap at ~1.7e9 s and the light would never once go blue
                           active=mapper.clock() - mapper.last_input < mapper.tune["led_idle_s"],
                           attention=mapper.attention == "waiting",
-                          suspended=mapper.suspended,
+                          suspended=mapper.suspended, dark=mapper.dark,
                           grace=now - t_opened < 2.0)
             if led != last_led:
                 # hidapi's write() returns -1 on failure instead of raising. Report it once
@@ -1615,31 +2221,62 @@ def selftest(map_file=None):
     print("curve                ok")
 
     class Recorder(NullInjector):
+        """Logs every call. In the screen-off tests it also stands in for the curtain: wake() is a
+        key on the computer, which lifts the curtain from its own thread, as _BlackCurtain does."""
         repeat_delay, repeat_period = 0.5, 0.1
+        screen = True                   # what display_off() answers
 
         def __init__(self):
             super().__init__(verbose=True)
             self.log = []
+            self.why = None             # what lifted_by() answers
+
+        def _input(self, *event):
+            self.log.append(event)
 
         def scroll(self, v, h=0):
-            self.log.append(("scroll", v, h))
+            self._input("scroll", v, h)
             super().scroll(v, h)
 
         def key(self, name, down):
-            self.log.append(("key", name, down))
+            self._input("key", name, down)
             super().key(name, down)
 
         def move(self, dx, dy):
-            self.log.append(("move", dx, dy))
+            self._input("move", dx, dy)
             super().move(dx, dy)
 
         def click(self, button, down):
-            self.log.append(("click", button, down))
+            self._input("click", button, down)
             super().click(button, down)
 
         def centre(self):
-            self.log.append(("centre",))
+            self._input("centre")
             super().centre()
+
+        up = False                      # is the curtain up, as display_dark() reports it
+
+        def display_off(self):
+            self.log.append(("display_off",))
+            self.up, self.why = self.screen, None
+            return self.screen
+
+        def display_on(self):
+            self.log.append(("display_on",))
+            self.up = False
+
+        def display_dark(self):
+            return self.up
+
+        def lifted_by(self):
+            return self.why
+
+        def wake(self, why="input"):    # the curtain comes down by itself, the way a key makes it
+            if self.up:
+                self.up, self.why = False, why
+
+        def keep_awake(self, on):
+            self.log.append(("awake", on))
 
     clock = [0.0]
     inj = Recorder()
@@ -1825,22 +2462,316 @@ def selftest(map_file=None):
     assert ("key", "super", True) in inj.log and ("key", "h", True) in inj.log, inj.log
     m.step(parse_usb(report()))
 
-    # Fn + pad click suspends; nothing gets out until the same chord resumes
+    # Fn + pad click blacks the screen out. A held Shift is let go at once; the curtain goes up
+    # SCREEN_OFF_DELAY_S later; nothing at all gets out while it is dark - not the finger that
+    # pressed the pad, not the stick, not an L3 tap; and a key on the computer, which lifts the
+    # curtain from its own thread, brings everything back without a cursor jump.
+    m.step(parse_usb(report()))
+    inj.log.clear()
+    notes = []
+    m.note = notes.append
+    clock[0] = 6.0
+    m.step(parse_usb(report(b6=0b0001_0000)))                   # Share ...
+    clock[0] = 6.4
+    m.step(parse_usb(report(b6=0b0001_0000)))                   # ... held: Shift engages
+    assert inj.log == [("key", "shift", True)], inj.log
+    m.step(parse_usb(report(b6=0b0101_0000)))                   # + Fn
+    clock[0] = 6.5
+    m.step(parse_usb(report(b6=0b0101_0000, b7=0b10, t1=(9, 900, 400))))   # + pad click
+    assert m.dark and inj.log[-1] == ("key", "shift", False), inj.log      # let go first ...
+    assert ("display_off",) not in inj.log, inj.log                         # ... not dark yet
+    inj.log.clear()
+    clock[0] = 6.6
+    m.step(parse_usb(report(b6=0b0101_0000, b7=0b10, t1=(9, 990, 450), rx=255)))   # finger, stick
+    assert inj.log == [], inj.log
+    clock[0] = 6.95
+    m.step(parse_usb(report(t1=(9, 990, 450))))                 # everything let go but the finger
+    assert inj.log == [("display_off",), ("awake", True)] and m.dark, inj.log
+    clock[0] = 7.0
+    m.step(parse_usb(report()))
+    m.step(parse_usb(report(b6=0b0100_0000)))                   # a bare L3 tap ...
+    clock[0] = 7.05
+    m.step(parse_usb(report()))
+    assert inj.log == [("display_off",), ("awake", True)] and m.dark, inj.log   # ... no Esc, nothing
+    assert led_for(dict(battery=100), True, active=True, dark=True) == LED_COLOURS["off"]
+    assert led_for(dict(battery=100), False, attention=True, dark=True) == LED_COLOURS["attention"]
+    clock[0] = 38.0                                             # half a minute later ...
+    m.step(parse_usb(report()))
+    assert inj.log[-1] == ("awake", True) and len(inj.log) == 3, inj.log    # ... renewed, once
+    inj.log.clear()
+    m.step(parse_usb(report(t1=(10, 500, 500))))                # a palm on the pad, still dark
+    inj.wake()                                                  # a key on the computer
+    clock[0] = 38.2
+    m.step(parse_usb(report(t1=(10, 500, 500))))
+    assert not m.dark and inj.log == [("display_on",), ("awake", False)], inj.log
+    assert notes == ["screen off", "screen back after 31 s (a key, the mouse or a touch)"], notes
+    m.step(parse_usb(report(t1=(10, 520, 500))))                # and the pad works again,
+    assert inj.log[-1] == ("move", 7, 0), inj.log               # from where the finger was
+    m.step(parse_usb(report()))
+    assert not any(e[0] == "click" for e in inj.log), inj.log   # and the palm that was down is no tap
+
+    # the same chord again: before the curtain is up it simply calls the switch-off off; once it
+    # is up, it lifts it on purpose
+    inj.log.clear()
+    clock[0] = 40.0
+    m.step(parse_usb(report(b6=0b0100_0000)))
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))          # dark ...
+    m.step(parse_usb(report(b6=0b0100_0000)))
+    clock[0] = 40.1
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))          # ... called off at once
+    assert not m.dark and inj.log == [("awake", False)], inj.log
+    m.step(parse_usb(report()))
+    inj.log.clear()
+    clock[0] = 41.0
     m.step(parse_usb(report(b6=0b0100_0000)))
     m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))
-    assert m.suspended is True
+    m.step(parse_usb(report()))
+    clock[0] = 41.5
+    m.step(parse_usb(report()))                                 # curtain up
+    m.step(parse_usb(report(b6=0b0100_0000)))
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))          # chord: lift it
+    assert inj.log == [("display_off",), ("awake", True), ("display_on",), ("awake", False)], inj.log
+    assert not m.dark
+    m.step(parse_usb(report()))
+
+    # the curtain can also come down because it stopped hearing from the mapper; the mapper
+    # notices that too, says so, and goes back to normal
     inj.log.clear()
+    clock[0] = 42.0
+    m.step(parse_usb(report(b6=0b0100_0000)))
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))
+    m.step(parse_usb(report()))
+    clock[0] = 42.5
+    m.step(parse_usb(report()))                                 # curtain up
+    inj.wake("lost")
+    clock[0] = 42.6
+    m.step(parse_usb(report()))
+    assert not m.dark, inj.log
+    assert inj.log == [("display_off",), ("awake", True), ("display_on",), ("awake", False)], inj.log
+    assert notes[-1] == "screen back after 0 s (the curtain stopped hearing from the mapper)", notes
+    m.note = None
+
+    # where nothing can black the screen out (Linux, --no-inject) the mapper does not go quiet
+    inj.log.clear()
+    inj.screen = False
+    clock[0] = 43.0
+    m.step(parse_usb(report(b6=0b0100_0000)))
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))
+    m.step(parse_usb(report()))
+    clock[0] = 43.5
+    m.step(parse_usb(report()))
+    assert not m.dark and inj.log == [("display_off",)], inj.log
+    inj.screen = True
+    # and screen_off_keep_awake = false leaves Windows' own timers alone
+    TUNE["screen_off_keep_awake"] = False
+    inj.log.clear()
+    clock[0] = 44.0
+    m.step(parse_usb(report(b6=0b0100_0000)))
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))
+    m.step(parse_usb(report()))
+    clock[0] = 44.5
+    m.step(parse_usb(report()))
+    assert m.dark and inj.log == [("display_off",)], inj.log
+    inj.wake()
+    clock[0] = 45.1
+    m.step(parse_usb(report()))
+    assert not m.dark
+    TUNE["screen_off_keep_awake"] = True
+
+    # suspend is still an action a map can bind: the same rules, injection off, screen untouched
+    saved_l2 = dict(ACTIONS_L2)
+    ACTIONS_L2["Pad"] = "suspend"
+    inj.log.clear()
+    clock[0] = 46.0
+    m.step(parse_usb(report(b6=0b0100_0000)))
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))
+    assert m.suspended is True and not m.dark
     m.step(parse_usb(report(rx=255)))
-    assert inj.log == [], inj.log
-    clock[0] = 7.0
+    clock[0] = 47.0
     m.step(parse_usb(report(b6=0b0100_0000)))      # a bare L3 tap while suspended ...
-    clock[0] = 7.05
+    clock[0] = 47.05
     m.step(parse_usb(report()))
     assert inj.log == [], inj.log                  # ... is swallowed too, not an Esc
     m.step(parse_usb(report(b6=0b0100_0000)))
     m.step(parse_usb(report(b6=0b0100_0000, b7=0b10)))
     assert m.suspended is False
+    m.step(parse_usb(report()))
+    # a finger kept down into suspend, moved while it lasts and still down when it ends is taken
+    # as it is then: no cursor jump on the way back
+    inj.log.clear()
+    clock[0] = 48.0
+    m.step(parse_usb(report(t1=(11, 500, 500))))
+    m.step(parse_usb(report(b6=0b0100_0000, t1=(11, 500, 500))))
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10, t1=(11, 500, 500))))     # suspend
+    m.step(parse_usb(report(t1=(11, 500, 500))))
+    assert m.suspended is True
+    m.step(parse_usb(report(t1=(11, 900, 500))))                               # moved meanwhile
+    m.step(parse_usb(report(b6=0b0100_0000, t1=(11, 900, 500))))
+    m.step(parse_usb(report(b6=0b0100_0000, b7=0b10, t1=(11, 900, 500))))     # resume
+    m.step(parse_usb(report(t1=(11, 900, 500))))
+    assert m.suspended is False and not any(e[0] == "move" for e in inj.log), inj.log
+    m.step(parse_usb(report()))
+    ACTIONS_L2.clear()
+    ACTIONS_L2.update(saved_l2)
     print("map v2               ok")
+
+    # screen off, the edges. Fn + pad click here goes down at `at` and lets go 10 ms later.
+    inj = Recorder()
+    m = Mapper(inj, clock=lambda: clock[0])
+    fn_bit, pad_bit = 0b0100_0000, 0b10
+
+    def screen_chord(at):
+        clock[0] = at
+        m.step(parse_usb(report(b6=fn_bit)))
+        m.step(parse_usb(report(b6=fn_bit, b7=pad_bit)))
+        clock[0] = at + 0.01
+        m.step(parse_usb(report()))
+        assert m.dark, inj.log
+
+    # the curtain goes up SCREEN_OFF_DELAY_S after the chord, not before; the mapper has no idle
+    # clock to consult (the Recorder has no last_input at all, so a call would fail the test), and
+    # a key that lifts the curtain ends the dark on the next report
+    screen_chord(0.0)
+    clock[0] = SCREEN_OFF_DELAY_S - 0.05
+    m.step(parse_usb(report()))
+    assert m.dark and inj.log == [], inj.log
+    clock[0] = SCREEN_OFF_DELAY_S + 0.01
+    m.step(parse_usb(report()))
+    assert inj.log == [("display_off",), ("awake", True)], inj.log
+    inj.wake()
+    clock[0] += 0.01
+    m.step(parse_usb(report()))
+    assert not m.dark and inj.log[2:] == [("display_on",), ("awake", False)], inj.log
+    clock[0] = 1.0
+    m.step(parse_usb(report()))
+    assert len(inj.log) == 4, inj.log
+    # an L3 press that starts while it is dark and ends after a key has woken everything is not
+    # an Esc, however short: it began while the mapper was not listening
+    inj.log.clear()
+    screen_chord(2.0)
+    clock[0] = 2.5
+    m.step(parse_usb(report()))
+    assert inj.log == [("display_off",), ("awake", True)], inj.log
+    clock[0] = 3.1
+    m.step(parse_usb(report(b6=fn_bit)))                        # L3 down in the dark ...
+    inj.wake()                                                  # ... a key on the computer ...
+    clock[0] = 3.13
+    m.step(parse_usb(report(b6=fn_bit)))
+    clock[0] = 3.15
+    m.step(parse_usb(report()))                                 # ... L3 up 50 ms after it went down
+    assert not m.dark and inj.log[2:] == [("display_on",), ("awake", False)], inj.log
+    # the same where nothing can black the screen out: L3 down inside the 0.4 s, up 0.18 s later,
+    # once the mapper is back to normal
+    inj.log.clear()
+    inj.screen = False
+    screen_chord(4.0)
+    clock[0] = 4.3
+    m.step(parse_usb(report(b6=fn_bit)))
+    clock[0] = 4.42
+    m.step(parse_usb(report(b6=fn_bit)))
+    assert not m.dark and inj.log == [("display_off",)], inj.log
+    clock[0] = 4.48
+    m.step(parse_usb(report()))
+    assert inj.log == [("display_off",)], inj.log
+    inj.screen = True
+    # a right stick still pushed when everything comes back sends no arrows until it has been
+    # back at rest - the arrows' version of the flick re-arm
+    inj.log.clear()
+    screen_chord(5.0)
+    clock[0] = 5.5
+    m.step(parse_usb(report(rx=255)))                           # curtain up, the stick pushed in the dark
+    inj.wake()
+    clock[0] = 6.1
+    m.step(parse_usb(report(rx=255)))                           # a key: back, the stick still pushed ...
+    clock[0] = 7.0
+    m.step(parse_usb(report(rx=255)))                           # ... for most of a second
+    assert not m.dark, inj.log
+    assert inj.log == [("display_off",), ("awake", True), ("display_on",), ("awake", False)], inj.log
+    m.step(parse_usb(report()))
+    m.step(parse_usb(report(rx=255)))                           # at rest, pushed again: arrows
+    assert inj.log[4:] == [("key", "right", True), ("key", "right", False)], inj.log
+    m.step(parse_usb(report()))
+    # a quiet mode the map can no longer toggle ends: a live reload (done here as main() does it)
+    # can take the chord away, and the dark must not outlive it; the same goes for suspend
+    inj.log.clear()
+    screen_chord(8.0)
+    clock[0] = 8.5
+    m.step(parse_usb(report()))
+    m.release_all()
+    m.layer2 = False
+    apply_mapping({"schema": 1, "fn": {"button": "L3", "tap": {"key": "esc"}}})
+    clock[0] = 8.6
+    m.step(parse_usb(report()))
+    assert not m.dark, inj.log
+    assert inj.log == [("display_off",), ("awake", True), ("display_on",), ("awake", False)], inj.log
+    apply_mapping({"schema": 1, "fn": {"button": "L3", "tap": {"key": "esc"}},
+                   "buttons": {"Pad": {"fn": {"action": "suspend"}}}})
+    clock[0] = 9.0
+    m.step(parse_usb(report(t1=(12, 500, 500))))                # a finger down, tracked ...
+    m.step(parse_usb(report(b6=fn_bit, t1=(12, 500, 500))))
+    m.step(parse_usb(report(b6=fn_bit, b7=pad_bit, t1=(12, 500, 500))))
+    m.step(parse_usb(report(t1=(12, 500, 500))))
+    assert m.suspended
+    m.step(parse_usb(report(t1=(12, 900, 500))))                # ... and moved while suspended
+    m.release_all()
+    m.layer2 = False
+    apply_mapping(default_mapping())                            # suspend is on no button by default
+    inj.log.clear()
+    m.step(parse_usb(report(t1=(12, 900, 500))))
+    assert not m.suspended
+    m.step(parse_usb(report(t1=(12, 900, 500))))
+    assert not any(e[0] == "move" for e in inj.log), inj.log   # that way out settles too: no jump
+    m.step(parse_usb(report()))
+    # the left stick's flicks get the right stick's hold-off: pushed through a wake, nothing;
+    # back inside flick_off and pushed again, the flick
+    inj.log.clear()
+    screen_chord(11.0)
+    clock[0] = 11.5
+    m.step(parse_usb(report(lx=255)))                           # curtain up, the stick pushed in the dark
+    inj.wake()
+    clock[0] = 11.6
+    m.step(parse_usb(report(lx=255)))                           # back, the stick still pushed
+    m.step(parse_usb(report(lx=255)))
+    assert ("key", "alt", True) not in inj.log, inj.log
+    m.step(parse_usb(report()))
+    m.step(parse_usb(report(lx=255)))
+    assert inj.log[-4:] == [("key", "alt", True), ("key", "tab", True), ("key", "tab", False),
+                            ("key", "alt", False)], inj.log
+    m.step(parse_usb(report()))
+    # Fn and the right stick (pane focus) both held through a wake: no pane jump, and that L3,
+    # pressed in the dark, is no Esc when it is let go
+    inj.log.clear()
+    screen_chord(13.0)
+    clock[0] = 13.5
+    m.step(parse_usb(report()))                                 # curtain up
+    m.step(parse_usb(report(b6=fn_bit)))                        # Fn down in the dark ...
+    m.step(parse_usb(report(b6=fn_bit, rx=255)))                # ... and the right stick pushed
+    inj.wake()
+    clock[0] = 13.6
+    m.step(parse_usb(report(b6=fn_bit, rx=255)))                # back, both still held
+    m.step(parse_usb(report(b6=fn_bit, rx=255)))
+    clock[0] = 13.7
+    m.step(parse_usb(report()))
+    assert inj.log == [("display_off",), ("awake", True), ("display_on",), ("awake", False)], inj.log
+    # the old coarse pointer (right_stick.mode = cursor) holds off the same way
+    dm = default_mapping()
+    dm["right_stick"]["mode"] = "cursor"
+    apply_mapping(dm)
+    inj.log.clear()
+    screen_chord(15.0)
+    clock[0] = 15.5
+    m.step(parse_usb(report(rx=255)))                           # curtain up, the stick pushed in the dark
+    inj.wake()
+    clock[0] = 15.6
+    m.step(parse_usb(report(rx=255)))
+    m.step(parse_usb(report(rx=255)))
+    assert not any(e[0] == "move" for e in inj.log), inj.log
+    m.step(parse_usb(report()))
+    m.step(parse_usb(report(rx=255)))                           # at rest, pushed again: it moves
+    assert ("move", 8, 0) in inj.log, inj.log
+    m.step(parse_usb(report()))
+    apply_mapping(default_mapping())
+    print("screen off edges     ok")
 
     # light bar: highest priority wins, idle is off
     bat = dict(battery=100)
@@ -1849,6 +2780,7 @@ def selftest(map_file=None):
     assert led_for(bat, True, active=True) == LED_COLOURS["layer2"]
     assert led_for(bat, True, active=True, attention=True) == LED_COLOURS["attention"]
     assert led_for(bat, True, True, True, suspended=True) == LED_COLOURS["suspended"]
+    assert led_for(bat, True, True, True, suspended=True, dark=True) == LED_COLOURS["suspended"]
     assert led_for(bat, False, grace=True) == LED_COLOURS["good"]
     # steady, never flashing: led_report must leave the flash bytes at zero
     assert led_report(LED_COLOURS["attention"])[9:11] == bytearray(b"\x00\x00")
@@ -2171,8 +3103,276 @@ def selftest(map_file=None):
         assert ctypes.sizeof(si.INPUT) == (40 if ctypes.sizeof(ctypes.c_void_p) == 8 else 28)
         assert si.scan["enter"] == 0x1C and si.scan["up"] == 0x48 and si.scan["a"] == 0x1E
         assert 0.25 <= si.repeat_delay <= 1.0 and 1 / 31 <= si.repeat_period <= 0.41
+        assert si.lifted_by() is None
+        curtain = _BlackCurtain()                       # the prototypes only: no thread, no window
+        assert isinstance(curtain._monitors(), list)   # read-only; the curtain is never raised here
+        assert ctypes.sizeof(curtain.RAWINPUTDEVICE) == (16 if ctypes.sizeof(ctypes.c_void_p) == 8 else 12)
         print(f"SendInput            ok (repeat delay {si.repeat_delay:.2f} s, "
               f"{1 / si.repeat_period:.0f}/s)")
+
+        # the curtain's own logic, driven on this thread against a stand-in for user32: no window
+        # is ever made, no Raw Input registered, nothing appears on the screen
+        class FakeUser32:
+            def __init__(self):
+                self.calls, self.hwnd, self.sink_ok, self.held = [], 1000, True, set()
+                self.timers, self.killed = [], []
+                self.up_while_creating, self.up_while_destroying, self.why_while_destroying = [], [], []
+
+            def CreateWindowExW(self, *a):
+                self.up_while_creating.append(c.still_up())
+                self.hwnd += 1
+                self.calls.append(("create", self.hwnd))
+                return self.hwnd
+
+            def DestroyWindow(self, h):
+                self.up_while_destroying.append(c.still_up())    # what the mapper would read by then
+                self.why_while_destroying.append(c.lifted_by)
+                self.calls.append(("destroy", h))
+                return 1
+
+            def SetTimer(self, hwnd, ident, ms, proc):
+                self.timers.append(ms)
+                return 7
+
+            def KillTimer(self, hwnd, ident):
+                self.killed.append(ident)
+                return 1
+
+            def GetAsyncKeyState(self, vk):
+                return -0x8000 if vk in self.held else 0   # a SHORT: the top bit set = down right now
+
+            def DefWindowProcW(self, *a):
+                return 0x5EED                           # so a message the curtain swallows is told apart
+
+            def RegisterRawInputDevices(self, rid, n, size):
+                self.calls.append(("sink", [(r.usUsagePage, r.usUsage, r.dwFlags, r.hwndTarget) for r in rid[:n]]))
+                return 1 if self.sink_ok else 0
+
+            def PostThreadMessageW(self, tid, msg, wp, lp):
+                self.calls.append(("post", msg))
+                return 1
+
+            def __getattr__(self, name):                # everything else simply succeeds
+                return lambda *a: 1
+
+        c = _BlackCurtain()
+        # Win32's own values, written out, so a typo in one of the constants cannot hide behind itself
+        assert (c.RIDEV_INPUTSINK, c.RIDEV_REMOVE, c.WM_INPUT, c.WM_POINTERDOWN, c.WM_DISPLAYCHANGE,
+                c.WM_SETCURSOR, c.WM_MOUSEACTIVATE, c.MA_NOACTIVATE, c.WM_CONTEXTMENU, c.WM_APPCOMMAND,
+                c.WM_TIMER, c.WS_POPUP, c.WS_EX, c.SW_SHOWNOACTIVATE, c.WM_POINTERUPDATE, c.WM_POINTERUP,
+                c.WM_POINTERACTIVATE, c.WM_POINTERCAPTURECHANGED, c.PA_NOACTIVATE) == (
+                0x100, 0x1, 0xFF, 0x246, 0x7E, 0x20, 0x21, 3, 0x7B, 0x319, 0x113, 0x80000000, 0x08000088, 4,
+                0x245, 0x247, 0x24B, 0x24C, 3)
+        assert c.LIFT_ON == {0xFF, 0x246, 0x201, 0x204, 0x207, 0x20B, 0x20A, 0x20E} and c.MOUSE_VKS == (1, 2, 4, 5, 6)
+        fake = c.u = FakeUser32()
+        c.tid = 1
+        c._monitors = lambda: [(0, 0, 100, 100), (100, 0, 50, 50)]
+        sink_on = lambda h: ("sink", [(1, 6, 0x100, h), (1, 2, 0x100, h)])  # noqa: E731  INPUTSINK, to h
+        sink_off = ("sink", [(1, 6, 0x1, None), (1, 2, 0x1, None)])        # REMOVE, NULL target
+        # up: a window per monitor, keyboard + mouse sent to the first one and nothing else, the
+        # thread's timer armed, and DARK_GRACE_S of grace from now
+        c._show(nudge=True)
+        w1 = list(c.windows)
+        assert len(w1) == 2 and c.still_up() and sink_on(w1[0]) in fake.calls, fake.calls
+        assert fake.timers == [c.TICK_MS] and 0 < c.grace_until - time.monotonic() <= DARK_GRACE_S, fake.timers
+        # still_up() is the mapper's heartbeat: asked in time, the timer never lifts it
+        c.ping = time.monotonic() - CURTAIN_LOST_S - 1
+        assert c.still_up()
+        c._tick()
+        assert c.still_up() and c.lifted_by is None
+        # inside DARK_GRACE_S nothing lifts it; after it a burst posts ONE lift, and a mouse move
+        # landing on the curtain never does (Windows makes those up)
+        fake.calls.clear()
+        c._wndproc(w1[0], c.WM_INPUT, 1, 0)
+        assert fake.calls == [], fake.calls
+        c.grace_until = 0.0
+        c._wndproc(w1[1], 0x0200, 0, 0)                 # WM_MOUSEMOVE
+        assert fake.calls == [], fake.calls
+        for m_ in (c.WM_INPUT, c.WM_INPUT, 0x0201, 0x020A):
+            c._wndproc(w1[0], m_, 1, 0)
+        assert fake.calls == [("post", c.WM_APP_LIFT)], fake.calls
+        # the lift: the reason set and still_up() already no before any window goes, the sink taken
+        # away (REMOVE wants a NULL target) before its window goes, and the timer killed
+        fake.calls.clear()
+        fake.why_while_destroying.clear()
+        fake.up_while_destroying.clear()
+        assert c._dispatch(c.WM_APP_LIFT)
+        assert c.lifted_by == "input" and not c.still_up() and c.windows == []
+        assert fake.calls == [sink_off, ("destroy", w1[0]), ("destroy", w1[1])], fake.calls
+        assert fake.why_while_destroying == ["input", "input"], fake.why_while_destroying
+        assert fake.up_while_destroying == [False, False] and fake.killed == [7], fake.up_while_destroying
+        c.lifted_by, n = None, len(fake.calls)
+        assert c._dispatch(c.WM_APP_LIFT) and c.lifted_by is None and len(fake.calls) == n   # a late one: nothing
+        # a click lifts it only once every button is let go, so its release lands on the curtain -
+        # where a context menu or a Back does nothing - and a button held past HELD_LIFT_S lifts it anyway
+        c._show(nudge=False)
+        c.ping, c.grace_until = time.monotonic(), 0.0
+        fake.calls.clear()
+        fake.held = {0x02}                              # the right button, still down
+        c._wndproc(c.windows[1], 0x0204, 2, 0)          # WM_RBUTTONDOWN
+        assert fake.calls == [("post", c.WM_APP_LIFT)], fake.calls
+        c._dispatch(c.WM_APP_LIFT)
+        c._tick()
+        assert c.still_up() and c.lifted_by is None
+        assert c._wndproc(c.windows[0], c.WM_CONTEXTMENU, 0, 0) == 1
+        assert c._wndproc(c.windows[0], c.WM_APPCOMMAND, 0, 0) == 1
+        fake.held = set()                               # let go
+        c._tick()
+        assert not c.still_up() and c.lifted_by == "input"
+        c.lifted_by = None
+        c._show(nudge=False)
+        c.ping, c.grace_until = time.monotonic(), 0.0
+        fake.held = {0x05}                              # a side button, held on and on
+        c._wndproc(c.windows[0], 0x020B, 0x10000, 0)    # WM_XBUTTONDOWN
+        c._dispatch(c.WM_APP_LIFT)
+        c._tick()
+        assert c.still_up()
+        c.lift_at -= c.HELD_LIFT_S + 0.1
+        c._tick()
+        assert not c.still_up() and c.lifted_by == "input"
+        fake.held = set()
+        # a finger or a pen: the curtain keeps the whole contact - handled, so it is never turned into
+        # a click on the app beneath, and it never takes the focus - and lifts once every contact is
+        # up; one that ends by losing capture counts as up too
+        c.lifted_by = None
+        c._show(nudge=False)
+        c.ping, c.grace_until = time.monotonic(), 0.0
+        fake.calls.clear()
+        assert c._wndproc(c.windows[0], c.WM_POINTERDOWN, 7, 0) == 0
+        assert fake.calls == [("post", c.WM_APP_LIFT)], fake.calls
+        assert c._wndproc(c.windows[0], c.WM_POINTERACTIVATE, 7, 0) == c.PA_NOACTIVATE
+        assert c._wndproc(c.windows[0], c.WM_POINTERUPDATE, 7, 0) == 0
+        assert c._wndproc(c.windows[1], c.WM_POINTERDOWN, 8, 0) == 0     # a second finger
+        c._dispatch(c.WM_APP_LIFT)
+        c._tick()
+        assert c.still_up() and c.lifted_by is None
+        assert c._wndproc(c.windows[0], c.WM_POINTERUP, 7, 0) == 0
+        c._tick()
+        assert c.still_up()                                               # one still down
+        assert c._wndproc(c.windows[1], c.WM_POINTERCAPTURECHANGED, 8, 0) == 0
+        c._tick()
+        assert not c.still_up() and c.lifted_by == "input"
+        c.contacts.add(9)                                                 # one whose up never came
+        c._show(nudge=False)
+        assert c.contacts == set()                                        # a new dark spell starts clean
+        c._dispatch(c.WM_APP_HIDE)
+        # a display change: every window hears of it, ONE rebuild runs, the new cover and its sink
+        # come before the old windows go, and it reads as up all the way through
+        c.lifted_by = None
+        c._show(nudge=False)
+        w2 = list(c.windows)
+        fake.calls.clear()
+        fake.up_while_creating.clear()
+        for h in w2:
+            c._wndproc(h, c.WM_DISPLAYCHANGE, 32, 0)
+        assert fake.calls == [("post", c.WM_APP_LAYOUT)], fake.calls
+        fake.calls.clear()
+        assert c._dispatch(c.WM_APP_LAYOUT)
+        w3 = list(c.windows)
+        assert len(w3) == 2 and not set(w3) & set(w2) and c.still_up() and c.lifted_by is None
+        assert fake.up_while_creating == [True, True], fake.up_while_creating
+        assert fake.calls == [("create", w3[0]), ("create", w3[1]), sink_on(w3[0]),
+                              ("destroy", w2[0]), ("destroy", w2[1])], fake.calls
+        # the next display change is heard again; a new cover that cannot be watched is destroyed
+        # again, and the old one stays
+        fake.sink_ok = False
+        fake.calls.clear()
+        c._wndproc(w3[0], c.WM_DISPLAYCHANGE, 32, 0)
+        assert fake.calls == [("post", c.WM_APP_LAYOUT)], fake.calls
+        fake.calls.clear()
+        a, b = fake.hwnd + 1, fake.hwnd + 2
+        c._dispatch(c.WM_APP_LAYOUT)
+        assert fake.calls == [("create", a), ("create", b), sink_on(a), ("destroy", a), ("destroy", b)], fake.calls
+        assert c.windows == w3 and c.still_up(), c.windows
+        fake.sink_ok = True
+        # the heartbeat: unchecked for CURTAIN_LOST_S, it lifts itself and says why
+        fake.why_while_destroying.clear()
+        fake.up_while_destroying.clear()
+        c.ping = time.monotonic() - CURTAIN_LOST_S - 1
+        c._tick()
+        assert c.lifted_by == "lost" and not c.still_up() and c.windows == []
+        assert fake.why_while_destroying == ["lost", "lost"], fake.why_while_destroying
+        assert fake.up_while_destroying == [False, False], fake.up_while_destroying
+        # no sink, no curtain: _show takes its windows away again, and says why
+        fake.sink_ok, c.error = False, None
+        c._show(nudge=False)
+        assert c.windows == [] and not c.still_up() and "could not be watched" in c.error, c.error
+        fake.sink_ok = True
+        # the mapper's own lift leaves no reason behind, and a stray display change after it is ignored
+        c.lifted_by = None
+        c._show(nudge=False)
+        assert c._dispatch(c.WM_APP_HIDE) and c.lifted_by is None and not c.still_up()
+        fake.calls.clear()
+        c._dispatch(c.WM_APP_LAYOUT)
+        assert fake.calls == [] and not c._dispatch(0x0400), fake.calls     # WM_USER: not ours
+        print("curtain logic        ok   (user32 stood in for; nothing shown)")
+
+        # SendInputInjector's side of screen off, against stand-ins for kernel32 and the curtain:
+        # the exact execution-state flags, the battery guard, and the hand-offs
+        import contextlib
+        import io
+
+        class FakeKernel32:
+            def __init__(self):
+                self.states, self.ac, self.pct = [], 1, 100
+
+            def SetThreadExecutionState(self, flags):
+                self.states.append(flags)
+                return 0x80000000
+
+            def GetSystemPowerStatus(self, p):
+                s = p._obj                              # byref() keeps the structure it points at
+                s.ACLineStatus, s.BatteryLifePercent = self.ac, self.pct
+                return 1
+
+        class FakeCurtain:
+            def __init__(self, ok):
+                self.ok, self.error, self.lifted_by, self.calls = ok, "no monitor", None, []
+
+            def up(self):
+                self.calls.append("up")
+                return self.ok
+
+            def down(self):
+                self.calls.append("down")
+
+            def still_up(self):
+                self.calls.append("still_up")
+                return self.ok
+
+        fk = si.kernel32 = FakeKernel32()
+        si.keep_awake(True)
+        si.keep_awake(False)
+        assert fk.states == [0x80000003, 0x80000000], fk.states  # CONTINUOUS|SYSTEM|DISPLAY, then let go
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            fk.ac, fk.pct = 0, BATTERY_GUARD_PCT - 1  # on battery, under the guard: let go instead
+            si.keep_awake(True)
+            si.keep_awake(True)
+        assert fk.states[-2:] == [0x80000000, 0x80000000], fk.states
+        assert err.getvalue().count("battery under") == 1, err.getvalue()   # said once
+        fk.pct = BATTERY_GUARD_PCT                    # at the line: still held
+        si.keep_awake(True)
+        fk.pct = 255                                  # level unknown: not low
+        si.keep_awake(True)
+        fk.ac, fk.pct = 1, 5                          # on mains, however low: held
+        si.keep_awake(True)
+        assert fk.states[-3:] == [0x80000003] * 3, fk.states
+        si.curtain = FakeCurtain(True)
+        assert si.display_off() is True and si.display_dark() is True and si.lifted_by() is None
+        si.curtain.lifted_by = "lost"
+        assert si.lifted_by() == "lost"
+        si.display_on()
+        assert si.curtain.calls == ["up", "still_up", "down"], si.curtain.calls
+        si.curtain = FakeCurtain(False)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            assert si.display_off() is False
+        assert "could not black the screen out (no monitor)" in err.getvalue(), err.getvalue()
+        si.close()
+        assert si.curtain.calls[-1] == "down" and fk.states[-1] == 0x80000000
+        si.curtain = None
+        print("screen-off injector  ok   (kernel32 and the curtain stood in for)")
     print("selftest passed")
 
 

@@ -2,7 +2,7 @@
 
 What the controller is, what came off it, what stayed, and the two things that bit: triggers that read pressed forever, and a USB port board that died.
 
-**TL;DR.** A DualShock 4 v2 (CUH-ZCT2, JDM-055 mainboard) with stock firmware. The grips, the rear shell, the triggers, the rumble motors and the battery are gone; the mainboard, the touchpad, both sticks and the Share/Options film stay, as a flat 130 x 55 mm part. Without the triggers L2 and R2 report 255 permanently, so the mapper excludes them from everything. The micro-USB port board (JDS-055) is a separate part on a ribbon, which is why the dead USB port this board suffered in October 2026 was a ten-dollar fix with no soldering.
+**TL;DR.** A DualShock 4 v2 (CUH-ZCT2, JDM-055 mainboard) with stock firmware. The grips, the rear shell, the triggers, the rumble motors and the battery are gone; the mainboard, the touchpad, both sticks and the Share/Options film stay, as a flat 130 x 55 mm part. Without the triggers L2 and R2 report pressed permanently - L2 at 255, R2 wandering - so the mapper excludes them from everything, and because Windows counts R2's wandering as user activity, screen off watches the keyboard and the mouse itself. The micro-USB port board (JDS-055) is a separate part on a ribbon, which is why the dead USB port this board suffered in October 2026 was a ten-dollar fix with no soldering.
 
 ## The controller
 
@@ -34,7 +34,7 @@ So the unit to keep and cut down is **midframe + board**: nothing fastens them t
 |---|---|
 | Rear shell, grips | The grips are dead weight: the button field, sticks and touchpad all sit in the central body. The cut line runs through both shells and the midframe together. |
 | L1 / R1 | Went with the rear shell. They were Shift and Ctrl; those moved to holding Share and Options. |
-| L2 / R2 triggers | Their springs and pivots live in the midframe; with the levers gone nothing stops the sensor, so **both read 255 at rest**. See below. |
+| L2 / R2 triggers | Their springs and pivots live in the midframe; with the levers gone nothing stops the sensor, so **both read pressed at rest** - L2 at 255, R2 wandering. See below. |
 | Rumble motors | Physically removed. **Never write a non-zero rumble byte** - the output report's two rumble bytes are held at zero and the self-test asserts it. |
 | Battery | Optional on USB; removed for thickness. |
 | D-pad, face buttons, PS keycaps | Not reachable from a planted palm, and the plate over them is where the palm rests. The `palm` face plate fills them in; the `full` face plate opens them again for a board that keeps its buttons. Their bindings stay in the mapper because they cost nothing and work again if a shell is ever refitted. |
@@ -50,13 +50,14 @@ So the unit to keep and cut down is **midframe + board**: nothing fastens them t
 
 ### L2 / R2 without triggers
 
-With the rear shell off the analogue triggers sit at 255 - full travel - permanently; on the hardware checklist they still swept 0..255 (148 and 247 distinct values), so the sensors are fine and it is purely mechanical. Three consequences in the software:
+With the rear shell off the analogue triggers lost their levers and springs. On the hardware checklist both sat at 255 - full travel - permanently, and they still swept 0..255 (148 and 247 distinct values), so the sensors are fine and it is purely mechanical. By 2026-10-26, in the frame, L2 still read 255 but R2 no longer rested anywhere: untouched, its analogue value wandered between 96 and 255 (28 distinct values, about 150 changes in 12 s), while both digital bits stayed set. Four consequences in the software:
 
 - nothing is bound to them, and the mapping loader **refuses** to bind them (`L2` and `R2` are reserved in `mapping.json`; the editor shows them disabled with this explanation);
 - they are excluded from "activity" for the light bar, or the blue light would never go out;
-- the dashboard shows `L2 255 R2 255` and that is correct.
+- the dashboard shows them as they are: `L2 255`, and R2 anywhere from about 96 to 255;
+- **Windows counts R2's wandering as user activity.** With the dock plugged in and nobody at the desk, the session's idle clock (`GetLastInputInfo`) moved 67 times in 12 s, each move within 20 ms of a change in R2's raw value, and it moved just as often with the mapper process suspended. In a separate 30 s spell the idle clock moved 115 times while low-level keyboard and mouse hooks saw no events at all (and none in another 6 s run). So the moves come from Windows' handling of the controller, not from the mapper, and nothing about them looks like a key or the mouse. Screen off therefore watches the keyboard and the mouse itself, through Raw Input ([CONTROLS.md](CONTROLS.md#mechanisms)). It probably also means Windows never sees the PC as idle while the dock is plugged in, so its own screen and sleep timeouts would never run out; that is untested (on mains power this laptop never sleeps anyway).
 
-A cradle could give the levers a stop and make them usable again; on this build they were cut off with the grips.
+A cradle could give the levers a stop and make them usable again - and a stop that parks R2 at the end of its travel, as L2 already is, should also quiet it; on this build they were cut off with the grips.
 
 ## The USB port board swap
 

@@ -70,7 +70,8 @@ PRETTY_KEY = {"ctrl": "Ctrl", "shift": "Shift", "alt": "Alt", "super": "Win", "e
               "volume_down": "Vol−", "mute": "Mute", "pageup": "PgUp", "pagedown": "PgDn",
               "home": "Home", "end": "End"}
 PRETTY_MOUSE = {"left": "Left click", "right": "Right click", "middle": "Middle click"}
-PRETTY_ACTION = {"suspend": "Suspend injection", "cursor_centre": "Centre cursor"}
+PRETTY_ACTION = {"screen_off": "Screen off", "suspend": "Suspend injection",
+                 "cursor_centre": "Centre cursor"}
 
 
 def pretty_key(spec):

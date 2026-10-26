@@ -4,7 +4,7 @@
   "notes": "Default map for the bare-board dock (five buttons). Hold L3 for the Fn layer. See docs/CONTROLS.md.",
   "fn": {"button": "L3", "tap": {"key": "esc"}},
   "buttons": {
-    "Pad":      {"press": {"mouse": "right"}, "tap": null, "hold": null, "fn": {"action": "suspend"}},
+    "Pad":      {"press": {"mouse": "right"}, "tap": null, "hold": null, "fn": {"action": "screen_off"}},
     "L3":       null,
     "R3":       {"press": {"key": "enter"}, "tap": null, "hold": null, "fn": {"key": "super+h"}},
     "Share":    {"press": null, "tap": {"key": "ctrl+c"}, "hold": {"key": "shift"}, "fn": {"key": "super+shift+s"}},

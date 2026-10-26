@@ -72,7 +72,7 @@
 <ellipse cx="575.2" cy="150" rx="2.6" ry="2.6" fill="#d8651a" stroke="none"/>
 <text x="278" y="107.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">1 finger  </tspan><tspan fill="#6e7781">cursor</tspan><tspan fill="#8b949e">   tap </tspan><tspan fill="#6e7781">Left click</tspan></text>
 <text x="278" y="126.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">2 fingers  </tspan><tspan fill="#6e7781">scroll</tspan><tspan fill="#8b949e">   tap </tspan><tspan fill="#6e7781">Middle click</tspan></text>
-<text x="278" y="145.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">click  </tspan><tspan fill="#6e7781">Right click</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Suspend injection</tspan></text>
+<text x="278" y="145.5" font-size="14" text-anchor="end" dominant-baseline="central"><tspan fill="#8b949e">click  </tspan><tspan fill="#6e7781">Right click</tspan><tspan fill="#d8651a" fill-opacity="0.8">   Fn </tspan><tspan fill="#d8651a">Screen off</tspan></text>
 <text x="278" y="260" font-size="15" text-anchor="end" dominant-baseline="central" font-weight="bold"><tspan fill="#6e7781">Left stick</tspan></text>
 <polyline points="286,260 296,260 342,308 511.2,308" fill="none" stroke="#8b949e" stroke-width="1.1" stroke-linejoin="round"/>
 <ellipse cx="511.2" cy="308" rx="2.6" ry="2.6" fill="#d8651a" stroke="none"/>

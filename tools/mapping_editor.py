@@ -1286,7 +1286,7 @@ def selftest():
         assert root.tag == "{http://www.w3.org/2000/svg}svg" and root.get("viewBox")
         texts = " ".join("".join(t.itertext()) for t in root.iter("{http://www.w3.org/2000/svg}text"))
         for needle in ("Touchpad", "Left stick", "Right stick", "Share", "Options", "Ctrl+C", "Ctrl+V",
-                       "Suspend injection", "Centre cursor", "hold = Fn layer", "Win+H", "Ctrl+K Ctrl+Left",
+                       "Screen off", "Centre cursor", "hold = Fn layer", "Win+H", "Ctrl+K Ctrl+Left",
                        "keyboard edge", "user's edge", "extender 60 mm", "extenders 115 + 115 mm"):
             assert needle in texts, (mode, needle)
         if mode == "full":
@@ -1326,6 +1326,7 @@ def selftest():
     assert render_map.pretty_key("super+shift+s") == "Win+Shift+S" and render_map.pretty_key("f5") == "F5"
     assert render_map.pretty_binding({"mouse": "middle"}) == "Middle click"
     assert render_map.pretty_binding({"action": "suspend"}) == "Suspend injection"
+    assert render_map.pretty_binding({"action": "screen_off"}) == "Screen off"
     assert render_map.pretty_binding(None) is None
     # selection / hover / lit flags change only the classes they should
     sel = render_map.build_scene(fresh_map(), "bare", {"Share": {"sel", "lit"}})

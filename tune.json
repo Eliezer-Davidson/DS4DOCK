@@ -14,5 +14,6 @@
   "hold_s": 0.25,
   "rstick_rate_min": 4.0,
   "rstick_rate_max": 25.0,
-  "led_idle_s": 2.0
+  "led_idle_s": 2.0,
+  "screen_off_keep_awake": true
 }
